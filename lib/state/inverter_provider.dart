@@ -41,6 +41,23 @@ class InverterProvider extends ChangeNotifier {
   int get activeFaultCount =>
       _all.where((e) => !e.replaced && e.faultType.name != 'none').length;
 
+  /// Следующий автоматический номер заказа в формате ORD-XXXX.
+  /// Ищет максимальный числовой суффикс среди существующих order_no
+  /// с этим префиксом и увеличивает на 1, чтобы не зависеть от порядка
+  /// создания/удаления записей.
+  String get nextOrderNo {
+    const prefix = 'ORD-';
+    var maxNumber = 1000;
+    for (final inv in _all) {
+      final raw = inv.orderNo.trim();
+      if (!raw.startsWith(prefix)) continue;
+      final numPart = raw.substring(prefix.length);
+      final parsed = int.tryParse(numPart);
+      if (parsed != null && parsed > maxNumber) maxNumber = parsed;
+    }
+    return '$prefix${maxNumber + 1}';
+  }
+
   Future<void> load() async {
     _loading = true;
     _error = null;

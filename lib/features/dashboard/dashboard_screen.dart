@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/models/inverter.dart';
+import '../../l10n/app_localizations.dart';
 import '../../state/inverter_provider.dart';
 import '../../state/inverter_filter.dart';
+import '../../state/settings_provider.dart';
 import '../detail/detail_screen.dart';
 import '../export/export_service.dart';
 import '../form/inverter_form_screen.dart';
@@ -12,8 +14,7 @@ import 'widgets/inverter_card.dart';
 
 /// Главный экран CRM: статистика, поиск, фильтры и список инверторов.
 class DashboardScreen extends StatefulWidget {
-  final ValueNotifier<ThemeMode> themeMode;
-  const DashboardScreen({super.key, required this.themeMode});
+  const DashboardScreen({super.key});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -56,15 +57,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _export(InverterProvider provider, ExportFormat format) async {
+    final l10n = AppLocalizations.of(context)!;
     final visible = provider.visible;
     if (visible.isEmpty) {
-      _toast('Nothing to export with current filters.');
+      _toast(l10n.exportNothing);
       return;
     }
     try {
       await ExportService().export(visible, format);
     } catch (e) {
-      _toast('Export failed: $e');
+      _toast(l10n.exportFailed(e.toString()));
     }
   }
 
@@ -75,9 +77,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final provider = context.watch<InverterProvider>();
+    final settings = context.watch<SettingsProvider>();
 
     return Scaffold(
       body: SafeArea(
@@ -90,41 +94,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 pinned: true,
                 floating: true,
                 titleSpacing: 20,
-                title: const _AppTitle(),
+                title: _AppTitle(title: l10n.appTitle),
                 actions: [
                   IconButton(
-                    tooltip: 'Toggle theme',
+                    tooltip: l10n.toggleTheme,
                     icon: Icon(
-                      widget.themeMode.value == ThemeMode.dark
+                      settings.themeMode == ThemeMode.dark
                           ? Icons.light_mode_outlined
                           : Icons.dark_mode_outlined,
                     ),
                     onPressed: () {
-                      widget.themeMode.value =
-                          widget.themeMode.value == ThemeMode.dark
-                          ? ThemeMode.light
-                          : ThemeMode.dark;
+                      final isDark = settings.themeMode == ThemeMode.dark;
+                      settings.setThemeMode(
+                        isDark ? ThemeMode.light : ThemeMode.dark,
+                      );
                     },
                   ),
                   PopupMenuButton<ExportFormat>(
-                    tooltip: 'Export',
+                    tooltip: l10n.exportTooltip,
                     icon: const Icon(Icons.ios_share_outlined),
                     onSelected: (f) => _export(provider, f),
-                    itemBuilder: (_) => const [
+                    itemBuilder: (_) => [
                       PopupMenuItem(
                         value: ExportFormat.excel,
                         child: ListTile(
                           contentPadding: EdgeInsets.zero,
-                          leading: Icon(Icons.table_chart_outlined),
-                          title: Text('Export to Excel'),
+                          leading: const Icon(Icons.table_chart_outlined),
+                          title: Text(l10n.exportToExcel),
                         ),
                       ),
                       PopupMenuItem(
                         value: ExportFormat.pdf,
                         child: ListTile(
                           contentPadding: EdgeInsets.zero,
-                          leading: Icon(Icons.picture_as_pdf_outlined),
-                          title: Text('Export to PDF'),
+                          leading: const Icon(Icons.picture_as_pdf_outlined),
+                          title: Text(l10n.exportToPdf),
                         ),
                       ),
                     ],
@@ -137,7 +141,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
-                  child: _StatsRow(provider: provider),
+                  child: _StatsRow(provider: provider, l10n: l10n),
                 ),
               ),
 
@@ -153,7 +157,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           onChanged: provider.setQuery,
                           textInputAction: TextInputAction.search,
                           decoration: InputDecoration(
-                            hintText: 'Search ASN, client, model, location',
+                            hintText: l10n.searchHint,
                             prefixIcon: const Icon(Icons.search_rounded),
                             suffixIcon: provider.filter.query.isEmpty
                                 ? null
@@ -185,7 +189,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     child: Row(
                       children: [
                         Text(
-                          '${provider.visible.length} of ${provider.totalCount} shown',
+                          l10n.shownOfTotal(
+                            provider.visible.length,
+                            provider.totalCount,
+                          ),
                           style: theme.textTheme.labelMedium?.copyWith(
                             color: scheme.onSurfaceVariant,
                           ),
@@ -193,7 +200,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         const Spacer(),
                         TextButton(
                           onPressed: provider.clearFilters,
-                          child: const Text('Clear filters'),
+                          child: Text(l10n.clearFilters),
                         ),
                       ],
                     ),
@@ -201,7 +208,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
 
               // Контент: loading / error / empty / list.
-              ..._buildBody(provider, theme, scheme),
+              ..._buildBody(provider, theme, scheme, l10n),
 
               const SliverToBoxAdapter(child: SizedBox(height: 96)),
             ],
@@ -211,7 +218,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addNew,
         icon: const Icon(Icons.add_rounded),
-        label: const Text('Add inverter'),
+        label: Text(l10n.addInverter),
       ),
     );
   }
@@ -220,6 +227,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     InverterProvider provider,
     ThemeData theme,
     ColorScheme scheme,
+    AppLocalizations l10n,
   ) {
     if (provider.loading) {
       return [
@@ -235,9 +243,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           hasScrollBody: false,
           child: _EmptyState(
             icon: Icons.error_outline_rounded,
-            title: 'Something went wrong',
+            title: l10n.errorTitle,
             message: provider.error!,
-            actionLabel: 'Retry',
+            actionLabel: l10n.retry,
             onAction: provider.load,
           ),
         ),
@@ -252,11 +260,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
           hasScrollBody: false,
           child: _EmptyState(
             icon: filtered ? Icons.search_off_rounded : Icons.inbox_outlined,
-            title: filtered ? 'No matches' : 'No inverters yet',
+            title: filtered ? l10n.emptyNoMatchesTitle : l10n.emptyNoDataTitle,
             message: filtered
-                ? 'Try adjusting search or filters.'
-                : 'Add your first inverter record to get started.',
-            actionLabel: filtered ? 'Clear filters' : 'Add inverter',
+                ? l10n.emptyNoMatchesMessage
+                : l10n.emptyNoDataMessage,
+            actionLabel: filtered ? l10n.clearFilters : l10n.addInverter,
             onAction: filtered ? provider.clearFilters : _addNew,
           ),
         ),
@@ -279,7 +287,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 }
 
 class _AppTitle extends StatelessWidget {
-  const _AppTitle();
+  final String title;
+  const _AppTitle({required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -296,7 +305,7 @@ class _AppTitle extends StatelessWidget {
           child: const Icon(Icons.bolt_rounded, color: Colors.white, size: 20),
         ),
         const SizedBox(width: 10),
-        const Text('Inverter CRM'),
+        Text(title),
       ],
     );
   }
@@ -304,7 +313,8 @@ class _AppTitle extends StatelessWidget {
 
 class _StatsRow extends StatelessWidget {
   final InverterProvider provider;
-  const _StatsRow({required this.provider});
+  final AppLocalizations l10n;
+  const _StatsRow({required this.provider, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
@@ -314,7 +324,7 @@ class _StatsRow extends StatelessWidget {
         Expanded(
           child: _StatCard(
             value: provider.totalCount.toString(),
-            label: 'Total units',
+            label: l10n.statTotalUnits,
             icon: Icons.solar_power_outlined,
             color: scheme.primary,
           ),
@@ -323,7 +333,7 @@ class _StatsRow extends StatelessWidget {
         Expanded(
           child: _StatCard(
             value: provider.replacedCount.toString(),
-            label: 'Replaced',
+            label: l10n.statReplaced,
             icon: Icons.swap_horiz_rounded,
             color: scheme.error,
           ),
@@ -332,7 +342,7 @@ class _StatsRow extends StatelessWidget {
         Expanded(
           child: _StatCard(
             value: provider.activeFaultCount.toString(),
-            label: 'Open faults',
+            label: l10n.statOpenFaults,
             icon: Icons.warning_amber_rounded,
             color: scheme.tertiary,
           ),

@@ -9,12 +9,16 @@ import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../core/constants/enums.dart';
+import '../../core/utils/enum_localizations.dart';
 import '../../core/utils/formatters.dart';
 import '../../data/models/inverter.dart';
+import '../../l10n/app_localizations.dart';
 import '../../state/inverter_provider.dart';
 
 /// Форма добавления и редактирования инвертора (ТЗ §7).
 /// При [existing] == null создаётся новая запись, иначе редактируется.
+/// Order No присваивается автоматически и не редактируется вручную —
+/// это гарантирует отсутствие дублей и человеческих ошибок при вводе.
 class InverterFormScreen extends StatefulWidget {
   final Inverter? existing;
   const InverterFormScreen({super.key, this.existing});
@@ -29,7 +33,6 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _uuid = const Uuid();
 
-  late final TextEditingController _orderNo;
   late final TextEditingController _model;
   late final TextEditingController _asn;
   late final TextEditingController _client;
@@ -40,6 +43,11 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
   late final TextEditingController _solution;
   late final TextEditingController _newAsn;
   late final TextEditingController _notes;
+
+  /// Зафиксирован один раз при открытии формы для НОВОЙ записи, чтобы
+  /// не пересчитываться при каждом setState (иначе номер мог бы "плыть"
+  /// при добавлении/удалении других записей в это же время).
+  late String _orderNo;
 
   DateTime? _installationDate;
   DateTime? _saleDate;
@@ -55,7 +63,7 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
   void initState() {
     super.initState();
     final e = widget.existing;
-    _orderNo = TextEditingController(text: e?.orderNo ?? '');
+    _orderNo = e?.orderNo ?? context.read<InverterProvider>().nextOrderNo;
     _model = TextEditingController(text: e?.model ?? '');
     _asn = TextEditingController(text: e?.asn ?? '');
     _client = TextEditingController(text: e?.clientName ?? '');
@@ -78,7 +86,6 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
   @override
   void dispose() {
     for (final c in [
-      _orderNo,
       _model,
       _asn,
       _client,
@@ -127,6 +134,7 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
   }
 
   Future<void> _addPhoto() async {
+    final l10n = AppLocalizations.of(context)!;
     final picker = ImagePicker();
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
@@ -136,12 +144,12 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_camera_outlined),
-              title: const Text('Take photo'),
+              title: Text(l10n.photoTakePhoto),
               onTap: () => Navigator.pop(context, ImageSource.camera),
             ),
             ListTile(
               leading: const Icon(Icons.photo_library_outlined),
-              title: const Text('Choose from gallery'),
+              title: Text(l10n.photoChooseGallery),
               onTap: () => Navigator.pop(context, ImageSource.gallery),
             ),
           ],
@@ -155,11 +163,12 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
       final saved = await _persist(picked.path, 'photos');
       setState(() => _photos = [..._photos, saved]);
     } catch (e) {
-      _snack('Could not add photo: $e');
+      _snack(l10n.photoAddFailed(e.toString()));
     }
   }
 
   Future<void> _addDocument() async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final result = await FilePicker.platform.pickFiles(allowMultiple: true);
       if (result == null) return;
@@ -169,7 +178,7 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
       }
       setState(() => _documents = [..._documents, ...saved]);
     } catch (e) {
-      _snack('Could not add document: $e');
+      _snack(l10n.documentAddFailed(e.toString()));
     }
   }
 
@@ -179,6 +188,7 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
   }
 
   Future<void> _save() async {
+    final l10n = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) return;
     final provider = context.read<InverterProvider>();
     final asn = _asn.text.trim();
@@ -189,7 +199,7 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
       exceptId: widget.existing?.id,
     );
     if (duplicate) {
-      _snack('ASN "$asn" already exists. It must be unique.');
+      _snack(l10n.asnDuplicate(asn));
       return;
     }
 
@@ -198,7 +208,7 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
     final base = widget.existing;
     final inverter = Inverter(
       id: base?.id ?? _uuid.v4(),
-      orderNo: _orderNo.text.trim(),
+      orderNo: _orderNo,
       model: _model.text.trim(),
       asn: asn,
       clientName: _client.text.trim(),
@@ -230,56 +240,59 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
       Navigator.of(context).pop(inverter);
     } catch (e) {
       setState(() => _saving = false);
-      _snack('Save failed: $e');
+      _snack(l10n.saveFailed(e.toString()));
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isEditing ? 'Edit inverter' : 'New inverter'),
+        title: Text(widget.isEditing ? l10n.formEditTitle : l10n.formNewTitle),
       ),
       body: Form(
         key: _formKey,
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 120),
           children: [
-            _sectionTitle(theme, 'Identification'),
-            _field(
-              controller: _orderNo,
-              label: 'Order No (serial)',
+            _sectionTitle(theme, l10n.sectionIdentification),
+            _readonlyField(
+              theme: theme,
+              label: l10n.fieldOrderNoAuto,
+              value: _orderNo,
               icon: Icons.tag_rounded,
             ),
+            const SizedBox(height: 12),
             _field(
               controller: _model,
-              label: 'Inverter model *',
+              label: l10n.fieldModel,
               icon: Icons.memory_rounded,
-              validator: _required,
+              validator: (v) => _required(v, l10n),
             ),
             _field(
               controller: _asn,
-              label: 'Inverter ASN (serial number) *',
+              label: l10n.fieldAsn,
               icon: Icons.qr_code_2_rounded,
-              validator: _required,
+              validator: (v) => _required(v, l10n),
             ),
             _field(
               controller: _client,
-              label: 'Client name *',
+              label: l10n.fieldClientName,
               icon: Icons.person_outline,
-              validator: _required,
+              validator: (v) => _required(v, l10n),
             ),
 
             const SizedBox(height: 8),
-            _sectionTitle(theme, 'Dates'),
+            _sectionTitle(theme, l10n.sectionDates),
             Row(
               children: [
                 Expanded(
                   child: _dateField(
                     theme,
-                    label: 'Installation date',
+                    label: l10n.fieldInstallationDate,
                     value: _installationDate,
                     onTap: () => _pickDate(installation: true),
                   ),
@@ -288,7 +301,7 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
                 Expanded(
                   child: _dateField(
                     theme,
-                    label: 'Sale date',
+                    label: l10n.fieldSaleDate,
                     value: _saleDate,
                     onTap: () => _pickDate(installation: false),
                   ),
@@ -297,33 +310,35 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
             ),
 
             const SizedBox(height: 16),
-            _sectionTitle(theme, 'Installation location'),
+            _sectionTitle(theme, l10n.sectionLocation),
             _field(
               controller: _country,
-              label: 'Country',
+              label: l10n.fieldCountry,
               icon: Icons.public_rounded,
             ),
             _field(
               controller: _city,
-              label: 'City',
+              label: l10n.fieldCity,
               icon: Icons.location_city_rounded,
             ),
             _field(
               controller: _site,
-              label: 'Site / object',
+              label: l10n.fieldSite,
               icon: Icons.place_outlined,
             ),
 
             const SizedBox(height: 8),
-            _sectionTitle(theme, 'Fault & solution'),
+            _sectionTitle(theme, l10n.sectionFault),
             DropdownButtonFormField<FaultType>(
               initialValue: _faultType,
-              decoration: const InputDecoration(
-                labelText: 'Fault type',
-                prefixIcon: Icon(Icons.warning_amber_rounded),
+              decoration: InputDecoration(
+                labelText: l10n.fieldFaultType,
+                prefixIcon: const Icon(Icons.warning_amber_rounded),
               ),
               items: FaultType.values
-                  .map((f) => DropdownMenuItem(value: f, child: Text(f.label)))
+                  .map(
+                    (f) => DropdownMenuItem(value: f, child: Text(f.l10n(l10n))),
+              )
                   .toList(),
               onChanged: (v) =>
                   setState(() => _faultType = v ?? FaultType.none),
@@ -331,28 +346,29 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
             const SizedBox(height: 12),
             _field(
               controller: _faultDesc,
-              label: 'Fault description',
+              label: l10n.fieldFaultDescription,
               icon: Icons.description_outlined,
               maxLines: 3,
             ),
             _field(
               controller: _solution,
-              label: 'Solution',
+              label: l10n.fieldSolution,
               icon: Icons.build_outlined,
               maxLines: 3,
             ),
 
             const SizedBox(height: 8),
-            _sectionTitle(theme, 'Replacement'),
-            _replacementSection(theme),
+            _sectionTitle(theme, l10n.sectionReplacement),
+            _replacementSection(theme, l10n),
 
             const SizedBox(height: 16),
-            _sectionTitle(theme, 'Attachments & notes'),
+            _sectionTitle(theme, l10n.sectionAttachments),
             _attachmentRow(
               theme,
               icon: Icons.photo_library_outlined,
-              label: 'Photos',
+              label: l10n.attachmentPhotos,
               count: _photos.length,
+              l10n: l10n,
               onAdd: _addPhoto,
               onClear: _photos.isEmpty
                   ? null
@@ -362,8 +378,9 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
             _attachmentRow(
               theme,
               icon: Icons.attach_file_rounded,
-              label: 'Documents',
+              label: l10n.attachmentDocuments,
               count: _documents.length,
+              l10n: l10n,
               onAdd: _addDocument,
               onClear: _documents.isEmpty
                   ? null
@@ -372,7 +389,7 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
             const SizedBox(height: 12),
             _field(
               controller: _notes,
-              label: 'Notes',
+              label: l10n.fieldNotes,
               icon: Icons.notes_rounded,
               maxLines: 4,
             ),
@@ -386,19 +403,21 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
             onPressed: _saving ? null : _save,
             icon: _saving
                 ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
                 : const Icon(Icons.save_rounded),
-            label: Text(widget.isEditing ? 'Save changes' : 'Create record'),
+            label: Text(
+              widget.isEditing ? l10n.saveChanges : l10n.createRecord,
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _replacementSection(ThemeData theme) {
+  Widget _replacementSection(ThemeData theme, AppLocalizations l10n) {
     final scheme = theme.colorScheme;
     return Card(
       child: Padding(
@@ -407,11 +426,11 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
           children: [
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Inverter replaced'),
+              title: Text(l10n.replacedSwitchTitle),
               subtitle: Text(
                 _replaced
-                    ? 'Link the replacement unit by its ASN'
-                    : 'Turn on if this unit was swapped',
+                    ? l10n.replacedSwitchSubtitleOn
+                    : l10n.replacedSwitchSubtitleOff,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),
@@ -424,44 +443,44 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
               curve: Curves.easeOut,
               child: _replaced
                   ? Column(
-                      children: [
-                        const SizedBox(height: 6),
-                        _field(
-                          controller: _newAsn,
-                          label: 'New inverter ASN *',
-                          icon: Icons.swap_horiz_rounded,
-                          validator: (v) =>
-                              _replaced && (v == null || v.trim().isEmpty)
-                              ? 'Enter the new ASN'
-                              : null,
+                children: [
+                  const SizedBox(height: 6),
+                  _field(
+                    controller: _newAsn,
+                    label: l10n.fieldNewAsn,
+                    icon: Icons.swap_horiz_rounded,
+                    validator: (v) =>
+                    _replaced && (v == null || v.trim().isEmpty)
+                        ? l10n.fieldNewAsnValidator
+                        : null,
+                  ),
+                  DropdownButtonFormField<OldInverterLocation>(
+                    initialValue: _oldLocation,
+                    decoration: InputDecoration(
+                      labelText: l10n.fieldOldLocation,
+                      prefixIcon: const Icon(Icons.inventory_2_outlined),
+                    ),
+                    items: OldInverterLocation.values
+                        .map(
+                          (loc) => DropdownMenuItem(
+                        value: loc,
+                        child: Row(
+                          children: [
+                            Icon(loc.icon, size: 18),
+                            const SizedBox(width: 10),
+                            Text(loc.l10n(l10n)),
+                          ],
                         ),
-                        DropdownButtonFormField<OldInverterLocation>(
-                          initialValue: _oldLocation,
-                          decoration: const InputDecoration(
-                            labelText: 'Old inverter current location',
-                            prefixIcon: Icon(Icons.inventory_2_outlined),
-                          ),
-                          items: OldInverterLocation.values
-                              .map(
-                                (l) => DropdownMenuItem(
-                                  value: l,
-                                  child: Row(
-                                    children: [
-                                      Icon(l.icon, size: 18),
-                                      const SizedBox(width: 10),
-                                      Text(l.label),
-                                    ],
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (v) => setState(
-                            () => _oldLocation =
-                                v ?? OldInverterLocation.warehouse,
-                          ),
-                        ),
-                      ],
+                      ),
                     )
+                        .toList(),
+                    onChanged: (v) => setState(
+                          () => _oldLocation =
+                          v ?? OldInverterLocation.warehouse,
+                    ),
+                  ),
+                ],
+              )
                   : const SizedBox.shrink(),
             ),
           ],
@@ -471,20 +490,23 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
   }
 
   Widget _attachmentRow(
-    ThemeData theme, {
-    required IconData icon,
-    required String label,
-    required int count,
-    required VoidCallback onAdd,
-    required VoidCallback? onClear,
-  }) {
+      ThemeData theme, {
+        required IconData icon,
+        required String label,
+        required int count,
+        required AppLocalizations l10n,
+        required VoidCallback onAdd,
+        required VoidCallback? onClear,
+      }) {
     final scheme = theme.colorScheme;
     return Card(
       child: ListTile(
         leading: Icon(icon, color: scheme.primary),
         title: Text(label),
         subtitle: Text(
-          count == 0 ? 'None attached' : '$count attached',
+          count == 0
+              ? l10n.attachmentNoneAttached
+              : l10n.attachmentCountAttached(count),
           style: theme.textTheme.bodySmall?.copyWith(
             color: scheme.onSurfaceVariant,
           ),
@@ -500,7 +522,7 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
             FilledButton.tonalIcon(
               onPressed: onAdd,
               icon: const Icon(Icons.add_rounded, size: 18),
-              label: const Text('Add'),
+              label: Text(l10n.attachmentAdd),
             ),
           ],
         ),
@@ -543,12 +565,44 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
     );
   }
 
-  Widget _dateField(
-    ThemeData theme, {
+  /// Поле только для чтения — используется для авто-сгенерированного
+  /// номера заказа, чтобы визуально показать, что оно неизменяемо.
+  Widget _readonlyField({
+    required ThemeData theme,
     required String label,
-    required DateTime? value,
-    required VoidCallback onTap,
+    required String value,
+    required IconData icon,
   }) {
+    final scheme = theme.colorScheme;
+    return InputDecorator(
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon),
+        filled: true,
+        fillColor: scheme.surfaceContainerHighest.withValues(alpha: 0.25),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              value,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          Icon(Icons.lock_outline_rounded, size: 16, color: scheme.onSurfaceVariant),
+        ],
+      ),
+    );
+  }
+
+  Widget _dateField(
+      ThemeData theme, {
+        required String label,
+        required DateTime? value,
+        required VoidCallback onTap,
+      }) {
     final scheme = theme.colorScheme;
     return InkWell(
       onTap: onTap,
@@ -559,7 +613,9 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
           prefixIcon: const Icon(Icons.event_outlined),
         ),
         child: Text(
-          value == null ? 'Select' : Formatters.date(value),
+          value == null
+              ? AppLocalizations.of(context)!.dateSelect
+              : Formatters.date(value),
           style: theme.textTheme.bodyLarge?.copyWith(
             color: value == null ? scheme.onSurfaceVariant : scheme.onSurface,
           ),
@@ -568,6 +624,6 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
     );
   }
 
-  String? _required(String? v) =>
-      (v == null || v.trim().isEmpty) ? 'Required field' : null;
+  String? _required(String? v, AppLocalizations l10n) =>
+      (v == null || v.trim().isEmpty) ? l10n.requiredField : null;
 }

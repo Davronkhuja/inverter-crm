@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/enums.dart';
+import '../../../core/utils/enum_localizations.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../state/inverter_filter.dart';
 
 /// Нижний лист с фильтрами дашборда: статус замены, тип неисправности,
@@ -53,6 +55,7 @@ class _FilterSheetState extends State<FilterSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
@@ -83,7 +86,7 @@ class _FilterSheetState extends State<FilterSheet> {
               Row(
                 children: [
                   Text(
-                    'Filters',
+                    l10n.filterTitle,
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -94,20 +97,20 @@ class _FilterSheetState extends State<FilterSheet> {
                       () => _draft = InverterFilter(query: _draft.query),
                     ),
                     icon: const Icon(Icons.restart_alt_rounded, size: 18),
-                    label: const Text('Reset'),
+                    label: Text(l10n.filterReset),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
 
-              _label(theme, 'Replacement status'),
+              _label(theme, l10n.filterReplacedOnly),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
                 children: ReplacedFilter.values.map((r) {
                   final selected = _draft.replaced == r;
                   return ChoiceChip(
-                    label: Text(r.label),
+                    label: Text(r.l10n(l10n)),
                     selected: selected,
                     onSelected: (_) =>
                         setState(() => _draft = _draft.copyWith(replaced: r)),
@@ -116,7 +119,7 @@ class _FilterSheetState extends State<FilterSheet> {
               ),
               const SizedBox(height: 18),
 
-              _label(theme, 'Fault type'),
+              _label(theme, l10n.filterFaultType),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
@@ -124,7 +127,7 @@ class _FilterSheetState extends State<FilterSheet> {
                 children: FaultType.values.map((f) {
                   final selected = _draft.faultType == f;
                   return ChoiceChip(
-                    label: Text(f.label),
+                    label: Text(f.l10n(l10n)),
                     selected: selected,
                     onSelected: (_) => setState(
                       () => _draft = selected
@@ -137,7 +140,7 @@ class _FilterSheetState extends State<FilterSheet> {
               const SizedBox(height: 18),
 
               if (widget.models.isNotEmpty) ...[
-                _label(theme, 'Model'),
+                _label(theme, l10n.filterModel),
                 const SizedBox(height: 8),
                 Wrap(
                   spacing: 8,
@@ -158,7 +161,7 @@ class _FilterSheetState extends State<FilterSheet> {
                 const SizedBox(height: 18),
               ],
 
-              _label(theme, 'Installation date'),
+              _label(theme, l10n.fieldInstallationDate),
               const SizedBox(height: 8),
               _dateRangeTile(
                 theme,
@@ -174,7 +177,7 @@ class _FilterSheetState extends State<FilterSheet> {
               ),
               const SizedBox(height: 18),
 
-              _label(theme, 'Sale date'),
+              _label(theme, l10n.fieldSaleDate),
               const SizedBox(height: 8),
               _dateRangeTile(
                 theme,
@@ -192,7 +195,7 @@ class _FilterSheetState extends State<FilterSheet> {
 
               FilledButton(
                 onPressed: () => Navigator.of(context).pop(_draft),
-                child: const Text('Apply filters'),
+                child: Text(l10n.filterApply),
               ),
             ],
           ),
@@ -231,7 +234,7 @@ class _FilterSheetState extends State<FilterSheet> {
                 child: Text(
                   hasRange
                       ? '${Formatters.date(from)}  –  ${Formatters.date(to)}'
-                      : 'Any date',
+                      : AppLocalizations.of(context)!.dateSelect,
                   style: theme.textTheme.bodyLarge,
                 ),
               ),

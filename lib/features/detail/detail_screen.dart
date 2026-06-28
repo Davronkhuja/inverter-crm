@@ -7,9 +7,11 @@ import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 
 import '../../core/constants/enums.dart';
+import '../../core/utils/enum_localizations.dart';
 import '../../core/utils/formatters.dart';
 import '../../data/models/inverter.dart';
 import '../../data/models/service_event.dart';
+import '../../l10n/app_localizations.dart';
 import '../../state/inverter_provider.dart';
 import '../../widgets/info_tile.dart';
 import '../../widgets/status_badge.dart';
@@ -91,27 +93,25 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   Future<void> _delete(Inverter inv) async {
+    final l10n = AppLocalizations.of(context)!;
     final provider = context.read<InverterProvider>();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
         icon: const Icon(Icons.delete_outline_rounded),
-        title: const Text('Delete inverter?'),
-        content: Text(
-          'Record ${inv.asn} (${inv.model}) will be permanently removed. '
-          'Replacement links pointing to it will be cleared.',
-        ),
+        title: Text(l10n.detailDeleteConfirmTitle),
+        content: Text(l10n.detailDeleteConfirmMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -174,6 +174,7 @@ class _DetailScreenState extends State<DetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final provider = context.watch<InverterProvider>();
@@ -190,7 +191,7 @@ class _DetailScreenState extends State<DetailScreen> {
     if (inv == null) {
       return Scaffold(
         appBar: AppBar(),
-        body: const Center(child: Text('Record not found')),
+        body: Center(child: Text(l10n.detailNotFound)),
       );
     }
 
@@ -213,12 +214,12 @@ class _DetailScreenState extends State<DetailScreen> {
             expandedHeight: 150,
             actions: [
               IconButton(
-                tooltip: 'Edit',
+                tooltip: l10n.detailEdit,
                 icon: const Icon(Icons.edit_outlined),
                 onPressed: () => _edit(inv!),
               ),
               IconButton(
-                tooltip: 'Delete',
+                tooltip: l10n.detailDelete,
                 icon: const Icon(Icons.delete_outline_rounded),
                 onPressed: () => _delete(inv!),
               ),
@@ -245,52 +246,52 @@ class _DetailScreenState extends State<DetailScreen> {
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 40),
             sliver: SliverList.list(
               children: [
-                _statusRow(theme, scheme, inv),
+                _statusRow(theme, scheme, inv, l10n),
                 const SizedBox(height: 14),
 
                 if (replacement != null || predecessor != null) ...[
-                  _linkBanner(theme, scheme, inv, replacement, predecessor),
+                  _linkBanner(theme, scheme, inv, replacement, predecessor, l10n),
                   const SizedBox(height: 14),
                 ],
 
                 SectionCard(
-                  title: 'General information',
+                  title: l10n.detailGeneralInfo,
                   icon: Icons.info_outline_rounded,
                   child: Column(
                     children: [
                       InfoTile(
                         icon: Icons.tag_rounded,
-                        label: 'Order No',
+                        label: l10n.fieldOrderNoLabel,
                         value: inv.orderNo,
                       ),
                       InfoTile(
                         icon: Icons.qr_code_2_rounded,
-                        label: 'Inverter ASN',
+                        label: l10n.fieldAsnLabel,
                         value: inv.asn,
                       ),
                       InfoTile(
                         icon: Icons.memory_rounded,
-                        label: 'Model',
+                        label: l10n.fieldModelLabel,
                         value: inv.model,
                       ),
                       InfoTile(
                         icon: Icons.person_outline,
-                        label: 'Client',
+                        label: l10n.fieldClientLabel,
                         value: inv.clientName,
                       ),
                       InfoTile(
                         icon: Icons.place_outlined,
-                        label: 'Installation location',
+                        label: l10n.fieldInstallLocationLabel,
                         value: inv.locationLabel,
                       ),
                       InfoTile(
                         icon: Icons.event_available_outlined,
-                        label: 'Installation date',
+                        label: l10n.fieldInstallationDate,
                         value: Formatters.date(inv.installationDate),
                       ),
                       InfoTile(
                         icon: Icons.sell_outlined,
-                        label: 'Sale date',
+                        label: l10n.fieldSaleDate,
                         value: Formatters.date(inv.saleDate),
                       ),
                     ],
@@ -299,25 +300,25 @@ class _DetailScreenState extends State<DetailScreen> {
                 const SizedBox(height: 12),
 
                 SectionCard(
-                  title: 'Fault & solution',
+                  title: l10n.detailFaultSection,
                   icon: Icons.warning_amber_rounded,
                   child: Column(
                     children: [
                       InfoTile(
                         icon: Icons.category_outlined,
-                        label: 'Fault type',
+                        label: l10n.fieldFaultType,
                         value: inv.faultType == FaultType.none
-                            ? 'No fault'
-                            : inv.faultType.label,
+                            ? l10n.detailNoFault
+                            : inv.faultType.l10n(l10n),
                       ),
                       InfoTile(
                         icon: Icons.description_outlined,
-                        label: 'Fault description',
+                        label: l10n.fieldFaultDescription,
                         value: inv.faultDescription,
                       ),
                       InfoTile(
                         icon: Icons.build_outlined,
-                        label: 'Solution',
+                        label: l10n.fieldSolution,
                         value: inv.solution,
                       ),
                     ],
@@ -326,15 +327,15 @@ class _DetailScreenState extends State<DetailScreen> {
                 const SizedBox(height: 12),
 
                 SectionCard(
-                  title: 'Replacement',
+                  title: l10n.detailReplacementSection,
                   icon: Icons.swap_horiz_rounded,
-                  child: _replacementBody(theme, scheme, inv, replacement),
+                  child: _replacementBody(theme, scheme, inv, replacement, l10n),
                 ),
                 const SizedBox(height: 12),
 
                 if (chain.length > 1) ...[
                   SectionCard(
-                    title: 'Replacement history',
+                    title: l10n.detailReplacementHistory,
                     icon: Icons.timeline_rounded,
                     child: ReplacementChain(
                       chain: chain,
@@ -345,12 +346,12 @@ class _DetailScreenState extends State<DetailScreen> {
                   const SizedBox(height: 12),
                 ],
 
-                _serviceLog(theme, scheme, inv),
+                _serviceLog(theme, scheme, inv, l10n),
                 const SizedBox(height: 12),
 
                 if (inv.photos.isNotEmpty) ...[
                   SectionCard(
-                    title: 'Photos',
+                    title: l10n.detailPhotos,
                     icon: Icons.photo_library_outlined,
                     child: _photoGrid(inv),
                   ),
@@ -359,7 +360,7 @@ class _DetailScreenState extends State<DetailScreen> {
 
                 if (inv.documents.isNotEmpty) ...[
                   SectionCard(
-                    title: 'Documents',
+                    title: l10n.detailDocuments,
                     icon: Icons.folder_outlined,
                     child: _documentList(theme, scheme, inv),
                   ),
@@ -368,7 +369,7 @@ class _DetailScreenState extends State<DetailScreen> {
 
                 if (inv.notes.trim().isNotEmpty)
                   SectionCard(
-                    title: 'Notes',
+                    title: l10n.detailNotes,
                     icon: Icons.notes_rounded,
                     child: Align(
                       alignment: Alignment.centerLeft,
@@ -383,33 +384,38 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 
-  Widget _statusRow(ThemeData theme, ColorScheme scheme, Inverter inv) {
+  Widget _statusRow(
+    ThemeData theme,
+    ColorScheme scheme,
+    Inverter inv,
+    AppLocalizations l10n,
+  ) {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
       children: [
         inv.replaced
             ? StatusBadge(
-                label: 'Replaced',
+                label: l10n.cardStatusReplaced,
                 color: scheme.error,
                 icon: Icons.swap_horiz_rounded,
                 subtle: false,
               )
             : StatusBadge(
-                label: 'Active',
+                label: l10n.cardStatusActive,
                 color: const Color(0xFF2E9E5B),
                 icon: Icons.check_circle_outline,
                 subtle: false,
               ),
         if (inv.faultType != FaultType.none)
           StatusBadge(
-            label: inv.faultType.label,
+            label: inv.faultType.l10n(l10n),
             color: scheme.tertiary,
             icon: Icons.warning_amber_rounded,
           ),
         if (inv.replaced)
           StatusBadge(
-            label: 'Old unit: ${inv.oldInverterLocation.label}',
+            label: l10n.detailOldLocationLabel(inv.oldInverterLocation.l10n(l10n)),
             color: scheme.secondary,
             icon: inv.oldInverterLocation.icon,
           ),
@@ -423,13 +429,14 @@ class _DetailScreenState extends State<DetailScreen> {
     Inverter inv,
     Inverter? replacement,
     Inverter? predecessor,
+    AppLocalizations l10n,
   ) {
     final children = <Widget>[];
     if (predecessor != null) {
       children.add(
         _LinkTile(
           icon: Icons.subdirectory_arrow_right_rounded,
-          caption: 'Replacement for',
+          caption: l10n.detailReplacementFor,
           asn: predecessor.asn,
           model: predecessor.model,
           color: scheme.secondary,
@@ -441,7 +448,7 @@ class _DetailScreenState extends State<DetailScreen> {
       children.add(
         _LinkTile(
           icon: Icons.swap_horiz_rounded,
-          caption: 'Replaced by',
+          caption: l10n.detailReplacedBy,
           asn: replacement.asn,
           model: replacement.model,
           color: scheme.primary,
@@ -464,6 +471,7 @@ class _DetailScreenState extends State<DetailScreen> {
     ColorScheme scheme,
     Inverter inv,
     Inverter? replacement,
+    AppLocalizations l10n,
   ) {
     if (!inv.replaced) {
       return Row(
@@ -476,7 +484,7 @@ class _DetailScreenState extends State<DetailScreen> {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'This inverter is in service and has not been replaced.',
+              l10n.detailActiveNotReplaced,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: scheme.onSurfaceVariant,
               ),
@@ -489,15 +497,15 @@ class _DetailScreenState extends State<DetailScreen> {
       children: [
         InfoTile(
           icon: Icons.inventory_2_outlined,
-          label: 'Old inverter current location',
-          value: inv.oldInverterLocation.label,
+          label: l10n.detailOldLocationField,
+          value: inv.oldInverterLocation.l10n(l10n),
         ),
         InfoTile(
           icon: Icons.swap_horiz_rounded,
-          label: 'New inverter ASN',
+          label: l10n.detailNewAsnField,
           valueWidget: replacement == null
               ? Text(
-                  '${inv.newAsn ?? '—'}  (not in database)',
+                  l10n.detailNotInDatabase(inv.newAsn ?? '—'),
                   style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: scheme.onSurfaceVariant,
@@ -512,14 +520,19 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 
-  Widget _serviceLog(ThemeData theme, ColorScheme scheme, Inverter inv) {
+  Widget _serviceLog(
+    ThemeData theme,
+    ColorScheme scheme,
+    Inverter inv,
+    AppLocalizations l10n,
+  ) {
     return SectionCard(
-      title: 'Fault & repair history',
+      title: l10n.detailFaultRepairHistory,
       icon: Icons.history_rounded,
       trailing: IconButton(
         visualDensity: VisualDensity.compact,
         icon: const Icon(Icons.add_circle_outline_rounded),
-        tooltip: 'Add event',
+        tooltip: l10n.detailAddEvent,
         onPressed: () => _addEvent(inv.asn),
       ),
       child: FutureBuilder<List<ServiceEvent>>(
@@ -545,7 +558,7 @@ class _DetailScreenState extends State<DetailScreen> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'No service events logged. Tap + to add a fault or repair.',
+                      l10n.detailNoServiceEvents,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
@@ -556,14 +569,21 @@ class _DetailScreenState extends State<DetailScreen> {
             );
           }
           return Column(
-            children: [for (final e in events) _eventTile(theme, scheme, e)],
+            children: [
+              for (final e in events) _eventTile(theme, scheme, e, l10n),
+            ],
           );
         },
       ),
     );
   }
 
-  Widget _eventTile(ThemeData theme, ColorScheme scheme, ServiceEvent e) {
+  Widget _eventTile(
+    ThemeData theme,
+    ColorScheme scheme,
+    ServiceEvent e,
+    AppLocalizations l10n,
+  ) {
     final color = e.type.color(scheme);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 7),
@@ -598,7 +618,7 @@ class _DetailScreenState extends State<DetailScreen> {
                         ),
                       ),
                     ),
-                    StatusBadge(label: e.type.label, color: color),
+                    StatusBadge(label: e.type.l10n(l10n), color: color),
                   ],
                 ),
                 const SizedBox(height: 2),
@@ -890,6 +910,7 @@ class _AddEventSheetState extends State<_AddEventSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Padding(
       padding: EdgeInsets.only(
@@ -906,7 +927,7 @@ class _AddEventSheetState extends State<_AddEventSheet> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Add service event',
+                l10n.addEventTitle,
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
@@ -916,7 +937,7 @@ class _AddEventSheetState extends State<_AddEventSheet> {
                 spacing: 8,
                 children: ServiceEventType.values.map((t) {
                   return ChoiceChip(
-                    label: Text(t.label),
+                    label: Text(t.l10n(l10n)),
                     avatar: Icon(t.icon, size: 16),
                     selected: _type == t,
                     onSelected: (_) => setState(() => _type = t),
@@ -927,21 +948,21 @@ class _AddEventSheetState extends State<_AddEventSheet> {
               TextFormField(
                 controller: _title,
                 textCapitalization: TextCapitalization.sentences,
-                decoration: const InputDecoration(
-                  labelText: 'Title *',
-                  prefixIcon: Icon(Icons.title_rounded),
+                decoration: InputDecoration(
+                  labelText: l10n.eventTitleField,
+                  prefixIcon: const Icon(Icons.title_rounded),
                 ),
                 validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Required' : null,
+                    (v == null || v.trim().isEmpty) ? l10n.eventRequired : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _description,
                 maxLines: 3,
                 textCapitalization: TextCapitalization.sentences,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                  prefixIcon: Icon(Icons.notes_rounded),
+                decoration: InputDecoration(
+                  labelText: l10n.eventDescriptionField,
+                  prefixIcon: const Icon(Icons.notes_rounded),
                   alignLabelWithHint: true,
                 ),
               ),
@@ -949,9 +970,9 @@ class _AddEventSheetState extends State<_AddEventSheet> {
               TextFormField(
                 controller: _technician,
                 textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(
-                  labelText: 'Technician',
-                  prefixIcon: Icon(Icons.engineering_outlined),
+                decoration: InputDecoration(
+                  labelText: l10n.eventTechnicianField,
+                  prefixIcon: const Icon(Icons.engineering_outlined),
                 ),
               ),
               const SizedBox(height: 12),
@@ -959,15 +980,18 @@ class _AddEventSheetState extends State<_AddEventSheet> {
                 onTap: _pickDate,
                 borderRadius: BorderRadius.circular(14),
                 child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'Date',
-                    prefixIcon: Icon(Icons.event_outlined),
+                  decoration: InputDecoration(
+                    labelText: l10n.eventDateField,
+                    prefixIcon: const Icon(Icons.event_outlined),
                   ),
                   child: Text(Formatters.date(_date)),
                 ),
               ),
               const SizedBox(height: 20),
-              FilledButton(onPressed: _submit, child: const Text('Add event')),
+              FilledButton(
+                onPressed: _submit,
+                child: Text(l10n.eventAddButton),
+              ),
             ],
           ),
         ),

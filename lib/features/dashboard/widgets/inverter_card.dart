@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/enums.dart';
+import '../../../core/utils/enum_localizations.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../data/models/inverter.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../widgets/status_badge.dart';
 
 /// Карточка одной записи инвертора в списке дашборда.
@@ -15,6 +17,7 @@ class InverterCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final inv = inverter;
@@ -59,7 +62,9 @@ class InverterCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            inv.model.isEmpty ? 'Unknown model' : inv.model,
+                            inv.model.isEmpty
+                                ? l10n.cardUnknownModel
+                                : inv.model,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.titleMedium?.copyWith(
@@ -68,7 +73,7 @@ class InverterCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        _replacementBadge(scheme),
+                        _replacementBadge(scheme, l10n),
                       ],
                     ),
                     const SizedBox(height: 3),
@@ -103,13 +108,14 @@ class InverterCard extends StatelessWidget {
                       children: [
                         if (inv.faultType != FaultType.none)
                           StatusBadge(
-                            label: inv.faultType.label,
+                            label: inv.faultType.l10n(l10n),
                             color: scheme.tertiary,
                             icon: Icons.warning_amber_rounded,
                           ),
                         StatusBadge(
-                          label:
-                              'Installed ${Formatters.date(inv.installationDate)}',
+                          label: l10n.cardInstalledOn(
+                            Formatters.date(inv.installationDate),
+                          ),
                           color: scheme.onSurfaceVariant,
                           icon: Icons.event_outlined,
                         ),
@@ -129,16 +135,16 @@ class InverterCard extends StatelessWidget {
     );
   }
 
-  Widget _replacementBadge(ColorScheme scheme) {
+  Widget _replacementBadge(ColorScheme scheme, AppLocalizations l10n) {
     if (inverter.replaced) {
       return StatusBadge(
-        label: 'Replaced',
+        label: l10n.cardStatusReplaced,
         color: scheme.error,
         icon: Icons.swap_horiz_rounded,
       );
     }
     return StatusBadge(
-      label: 'Active',
+      label: l10n.cardStatusActive,
       color: const Color(0xFF2E9E5B),
       icon: Icons.check_circle_outline,
     );

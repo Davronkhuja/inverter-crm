@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/models/inverter.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Визуализация цепочки замен: Old ASN -> New ASN -> Next ASN.
 /// Текущий инвертор подсвечен. Любой узел кликабелен для перехода.
@@ -20,18 +21,25 @@ class ReplacementChain extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       children: [
         for (var i = 0; i < chain.length; i++) ...[
-          _node(theme, scheme, chain[i], i),
+          _node(theme, scheme, l10n, chain[i], i),
           if (i < chain.length - 1) _connector(scheme),
         ],
       ],
     );
   }
 
-  Widget _node(ThemeData theme, ColorScheme scheme, Inverter inv, int index) {
+  Widget _node(
+      ThemeData theme,
+      ColorScheme scheme,
+      AppLocalizations l10n,
+      Inverter inv,
+      int index,
+      ) {
     final isCurrent = inv.asn == currentAsn;
     final isLast = index == chain.length - 1;
     return Material(
@@ -103,7 +111,7 @@ class ReplacementChain extends StatelessWidget {
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
-                              'Current',
+                              l10n.chainCurrent,
                               style: theme.textTheme.labelSmall?.copyWith(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w700,

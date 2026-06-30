@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/enums.dart';
+import '../../core/theme/app_icons.dart';
+import '../../core/theme/app_icons_context.dart';
+import '../../core/utils/enum_localizations.dart';
+import '../../core/utils/formatters.dart';
 import '../../data/models/inverter.dart';
 import '../../state/inverter_provider.dart';
 import '../../l10n/app_localizations.dart';
+import '../../widgets/status_badge.dart';
 import '../detail/detail_screen.dart';
 
-/// Экран склада: показывает только инверторы, которые были заменены —
-/// это единственный способ, которым unit попадает на склад/к сервису/
-/// возвращается на завод и т.д. Склад не принимает прямого ввода новых
-/// данных, это чисто отчётный экран на основе поля "старое местонахождение"
-/// у замененных записей.
 class WarehouseScreen extends StatelessWidget {
   const WarehouseScreen({super.key});
 
@@ -20,43 +20,53 @@ class WarehouseScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final icons = context.icons;
     final provider = context.watch<InverterProvider>();
 
     if (provider.loading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // Только замененные записи — у них заполнено oldInverterLocation.
     final replaced = provider.all.where((inv) => inv.replaced).toList();
+
     if (replaced.isEmpty) {
-      return _buildEmpty(context, l10n, theme, scheme);
+      return _buildEmpty(context, l10n, theme, scheme, icons);
     }
 
-    final inWarehouse = replaced
-        .where((i) => i.oldInverterLocation == OldInverterLocation.warehouse)
-        .toList();
-    final atCustomers = replaced
-        .where((i) => i.oldInverterLocation == OldInverterLocation.customerSite)
-        .toList();
-    final atService = replaced
-        .where((i) => i.oldInverterLocation == OldInverterLocation.serviceCenter)
+    // Group by oldInverterLocation
+    final grouped = <OldInverterLocation, List<Inverter>>{};
+    for (final inv in replaced) {
+      grouped.putIfAbsent(inv.oldInverterLocation, () => []).add(inv);
+    }
+    // Sort groups by location ordinal for stable order
+    final groupEntries = OldInverterLocation.values
+        .where((loc) => grouped.containsKey(loc))
+        .map((loc) => MapEntry(loc, grouped[loc]!))
         .toList();
 
-    final byModel = <String, List<Inverter>>{};
-    for (final inv in inWarehouse) {
-      final key = inv.model.trim().isEmpty ? '—' : inv.model.trim();
-      byModel.putIfAbsent(key, () => []).add(inv);
+    // Build flat sliver list: section header + items per group
+    final sliverItems = <Widget>[];
+    for (final entry in groupEntries) {
+      final loc = entry.key;
+      final items = entry.value;
+      sliverItems.add(_GroupHeader(
+        icon: loc.icon,
+        label: loc.l10n(l10n),
+        count: items.length,
+        color: _locationColor(loc, scheme),
+      ));
+      for (final inv in items) {
+        sliverItems.add(_ReplacedCard(
+          inverter: inv,
+          icons: icons,
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => DetailScreen(inverterId: inv.id),
+            ),
+          ),
+        ));
+      }
     }
-    final modelEntries = byModel.entries.toList()
-      ..sort((a, b) => b.value.length.compareTo(a.value.length));
-
-    final byLocation = <String, List<Inverter>>{};
-    for (final inv in inWarehouse) {
-      final key = inv.locationLabel;
-      byLocation.putIfAbsent(key, () => []).add(inv);
-    }
-    final locationEntries = byLocation.entries.toList()
-      ..sort((a, b) => b.value.length.compareTo(a.value.length));
 
     return SafeArea(
       child: CustomScrollView(
@@ -66,109 +76,62 @@ class WarehouseScreen extends StatelessWidget {
             floating: true,
             titleSpacing: 20,
             title: Text(l10n.warehouseTitle),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
-            sliver: SliverToBoxAdapter(
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _StatCard(
-                      value: inWarehouse.length.toString(),
-                      label: l10n.warehouseTotalInStock,
-                      icon: Icons.warehouse_outlined,
-                      color: scheme.primary,
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(36),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+                child: Row(
+                  children: [
+                    Icon(
+                      icons.statusReplaced,
+                      size: 14,
+                      color: scheme.onSurfaceVariant,
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _StatCard(
-                      value: atCustomers.length.toString(),
-                      label: l10n.warehouseAtCustomers,
-                      icon: Icons.location_on_outlined,
-                      color: scheme.tertiary,
+                    const SizedBox(width: 6),
+                    Text(
+                      '${replaced.length} ${l10n.cardStatusReplaced.toLowerCase()}',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _StatCard(
-                      value: atService.length.toString(),
-                      label: l10n.warehouseAtService,
-                      icon: Icons.build_circle_outlined,
-                      color: scheme.error,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-            sliver: SliverToBoxAdapter(
-              child: _SectionLabel(l10n.warehouseByModel),
-            ),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+            sliver: SliverList.list(children: sliverItems),
           ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-            sliver: SliverList.separated(
-              itemCount: modelEntries.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 8),
-              itemBuilder: (_, i) {
-                final entry = modelEntries[i];
-                return _BreakdownTile(
-                  icon: Icons.memory_rounded,
-                  label: entry.key,
-                  count: entry.value.length,
-                  total: inWarehouse.length,
-                  color: scheme.primary,
-                );
-              },
-            ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-            sliver: SliverToBoxAdapter(
-              child: _SectionLabel(l10n.warehouseByLocation),
-            ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-            sliver: SliverList.separated(
-              itemCount: locationEntries.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 8),
-              itemBuilder: (_, i) {
-                final entry = locationEntries[i];
-                return _BreakdownTile(
-                  icon: Icons.place_outlined,
-                  label: entry.key,
-                  count: entry.value.length,
-                  total: inWarehouse.length,
-                  color: scheme.tertiary,
-                  onTap: entry.value.length == 1
-                      ? () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => DetailScreen(
-                        inverterId: entry.value.first.id,
-                      ),
-                    ),
-                  )
-                      : null,
-                );
-              },
-            ),
-          ),
-          const SliverToBoxAdapter(child: SizedBox(height: 32)),
         ],
       ),
     );
   }
 
+  Color _locationColor(OldInverterLocation loc, ColorScheme scheme) {
+    switch (loc) {
+      case OldInverterLocation.warehouse:
+        return scheme.primary;
+      case OldInverterLocation.serviceCenter:
+        return scheme.error;
+      case OldInverterLocation.customerSite:
+        return scheme.tertiary;
+      case OldInverterLocation.returnedToFactory:
+        return scheme.secondary;
+      case OldInverterLocation.scrapped:
+        return scheme.onSurfaceVariant;
+      case OldInverterLocation.other:
+        return scheme.outline;
+    }
+  }
+
   Widget _buildEmpty(
-      BuildContext context,
-      AppLocalizations l10n,
-      ThemeData theme,
-      ColorScheme scheme,
-      ) {
+    BuildContext context,
+    AppLocalizations l10n,
+    ThemeData theme,
+    ColorScheme scheme,
+    AppIconSet icons,
+  ) {
     return SafeArea(
       child: Column(
         children: [
@@ -184,11 +147,13 @@ class WarehouseScreen extends StatelessWidget {
                       width: 76,
                       height: 76,
                       decoration: BoxDecoration(
-                        color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                        color: scheme.surfaceContainerHighest.withValues(
+                          alpha: 0.5,
+                        ),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
-                        Icons.warehouse_outlined,
+                        icons.warehouseStock,
                         size: 34,
                         color: scheme.onSurfaceVariant,
                       ),
@@ -212,139 +177,195 @@ class WarehouseScreen extends StatelessWidget {
   }
 }
 
-class _SectionLabel extends StatelessWidget {
-  final String text;
-  const _SectionLabel(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-        fontWeight: FontWeight.w700,
-        color: Theme.of(context).colorScheme.primary,
-        letterSpacing: 0.2,
-      ),
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  final String value;
-  final String label;
-  final IconData icon;
-  final Color color;
-
-  const _StatCard({
-    required this.value,
-    required this.label,
-    required this.icon,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(13, 13, 10, 13),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: color, size: 20),
-            const SizedBox(height: 10),
-            Text(
-              value,
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.5,
-              ),
-            ),
-            const SizedBox(height: 1),
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _BreakdownTile extends StatelessWidget {
+class _GroupHeader extends StatelessWidget {
   final IconData icon;
   final String label;
   final int count;
-  final int total;
   final Color color;
-  final VoidCallback? onTap;
 
-  const _BreakdownTile({
+  const _GroupHeader({
     required this.icon,
     required this.label,
     required this.count,
-    required this.total,
     required this.color,
-    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(top: 20, bottom: 8),
+      child: Row(
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, size: 15, color: color),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              label,
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              count.toString(),
+              style: theme.textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: color,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReplacedCard extends StatelessWidget {
+  final Inverter inverter;
+  final AppIconSet icons;
+  final VoidCallback onTap;
+
+  const _ReplacedCard({
+    required this.inverter,
+    required this.icons,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final ratio = total == 0 ? 0.0 : count / total;
-    return Card(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(icon, size: 18, color: color),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+    final isDark = theme.brightness == Brightness.dark;
+    final inv = inverter;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Card(
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(18),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        scheme.error.withValues(alpha: isDark ? 0.28 : 0.16),
+                        scheme.error.withValues(alpha: isDark ? 0.10 : 0.04),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: scheme.error.withValues(alpha: 0.20),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    count.toString(),
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: scheme.onSurface,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: LinearProgressIndicator(
-                  value: ratio,
-                  minHeight: 6,
-                  backgroundColor: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                  valueColor: AlwaysStoppedAnimation(color),
+                  child: Icon(icons.unit, color: scheme.error, size: 20),
                 ),
-              ),
-            ],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              inv.model.isEmpty ? l10n.cardUnknownModel : inv.model,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          StatusBadge(
+                            label: l10n.cardStatusReplaced,
+                            color: scheme.error,
+                            icon: icons.statusReplaced,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        inv.asn,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: scheme.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      _row(theme, scheme, icons.client,
+                          inv.clientName.isEmpty ? '—' : inv.clientName),
+                      const SizedBox(height: 2),
+                      _row(theme, scheme, icons.location, inv.locationLabel),
+                      if (inv.newAsn != null && inv.newAsn!.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        _row(theme, scheme, icons.swap,
+                            '→ ${inv.newAsn}'),
+                      ],
+                      const SizedBox(height: 6),
+                      StatusBadge(
+                        label: l10n.cardInstalledOn(
+                          Formatters.date(inv.installationDate),
+                        ),
+                        color: scheme.onSurfaceVariant,
+                        icon: icons.calendar,
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  icons.chevronRight,
+                  color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
+                ),
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _row(ThemeData theme, ColorScheme scheme, IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 13, color: scheme.onSurfaceVariant),
+        const SizedBox(width: 5),
+        Expanded(
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

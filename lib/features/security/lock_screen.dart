@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/theme/app_icons_context.dart';
 import '../../l10n/app_localizations.dart';
 import '../../state/security_provider.dart';
 import '../../widgets/pin_keypad.dart';
@@ -68,6 +69,7 @@ class _LockScreenState extends State<LockScreen> {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final icons = context.icons;
     final security = context.watch<SecurityProvider>();
 
     return Material(
@@ -83,11 +85,22 @@ class _LockScreenState extends State<LockScreen> {
                   width: 64,
                   height: 64,
                   decoration: BoxDecoration(
-                    color: scheme.primary,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [scheme.primary, scheme.primary.withValues(alpha: 0.7)],
+                    ),
                     borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: scheme.primary.withValues(alpha: 0.35),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
                   ),
-                  child: const Icon(
-                    Icons.lock_outline_rounded,
+                  child: Icon(
+                    icons.lock,
                     color: Colors.white,
                     size: 30,
                   ),
@@ -113,6 +126,7 @@ class _LockScreenState extends State<LockScreen> {
                 PinKeypad(
                   onDigit: _onDigit,
                   onBackspace: _onBackspace,
+                  biometricIcon: icons.biometric,
                   onBiometric: security.biometricEnabled && security.biometricAvailable
                       ? _tryBiometric
                       : null,

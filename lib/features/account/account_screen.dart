@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/theme/app_icons_context.dart';
+import '../../core/theme/app_theme.dart';
 import '../../l10n/app_localizations.dart';
+import '../../state/inverter_provider.dart';
 import '../../state/security_provider.dart';
 import '../../state/settings_provider.dart';
+import '../export/export_service.dart';
 import '../security/pin_setup_screen.dart';
 
 class AccountScreen extends StatefulWidget {
@@ -37,6 +41,7 @@ class _AccountScreenState extends State<AccountScreen> {
   Future<void> _pickTheme(SettingsProvider settings) async {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    final icons = context.icons;
     final result = await showModalBottomSheet<ThemeMode>(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -56,20 +61,20 @@ class _AccountScreenState extends State<AccountScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            _ThemeOption(
-              icon: Icons.brightness_auto_outlined,
+            _OptionTile(
+              icon: icons.themeSystem,
               label: l10n.themeSystem,
               selected: settings.themeMode == ThemeMode.system,
               onTap: () => Navigator.pop(context, ThemeMode.system),
             ),
-            _ThemeOption(
-              icon: Icons.light_mode_outlined,
+            _OptionTile(
+              icon: icons.themeLight,
               label: l10n.themeLight,
               selected: settings.themeMode == ThemeMode.light,
               onTap: () => Navigator.pop(context, ThemeMode.light),
             ),
-            _ThemeOption(
-              icon: Icons.dark_mode_outlined,
+            _OptionTile(
+              icon: icons.themeDark,
               label: l10n.themeDark,
               selected: settings.themeMode == ThemeMode.dark,
               onTap: () => Navigator.pop(context, ThemeMode.dark),
@@ -158,6 +163,26 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
+  Future<void> _export(ExportFormat format) async {
+    final l10n = AppLocalizations.of(context)!;
+    final provider = context.read<InverterProvider>();
+    final visible = provider.visible;
+    if (visible.isEmpty) {
+      _snack(l10n.exportNothing);
+      return;
+    }
+    try {
+      await ExportService().export(visible, format);
+    } catch (e) {
+      _snack(l10n.exportFailed(e.toString()));
+    }
+  }
+
+  void _snack(String msg) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
+
   String _themeLabel(AppLocalizations l10n, ThemeMode mode) {
     switch (mode) {
       case ThemeMode.system:
@@ -182,11 +207,23 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
+  String _appearanceLabel(AppLocalizations l10n, AppAppearance a) {
+    switch (a) {
+      case AppAppearance.power:
+        return l10n.appearancePower;
+      case AppAppearance.nature:
+        return l10n.appearanceNature;
+      case AppAppearance.tech:
+        return l10n.appearanceTech;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final icons = context.icons;
     final settings = context.watch<SettingsProvider>();
     final security = context.watch<SecurityProvider>();
 
@@ -205,20 +242,53 @@ class _AccountScreenState extends State<AccountScreen> {
               sliver: SliverList.list(
                 children: [
                   _SectionLabel(l10n.accountAppearance),
+                  _AppearancePicker(
+                    selected: settings.appearance,
+                    l10n: l10n,
+                    label: _appearanceLabel,
+                    onSelect: settings.setAppearance,
+                  ),
+                  const SizedBox(height: 12),
                   _SettingsCard(
                     children: [
                       _SettingsTile(
-                        icon: Icons.palette_outlined,
+                        icon: icons.themeLight,
                         title: l10n.accountTheme,
                         trailingText: _themeLabel(l10n, settings.themeMode),
                         onTap: () => _pickTheme(settings),
                       ),
                       const Divider(height: 1),
                       _SettingsTile(
-                        icon: Icons.language_rounded,
+                        icon: icons.language,
                         title: l10n.accountLanguage,
                         trailingText: _languageLabel(l10n, settings.locale),
                         onTap: () => _pickLanguage(settings),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  _SectionLabel(l10n.accountDataExport),
+                  _SettingsCard(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                        child: Text(
+                          l10n.exportDescription,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                      _SettingsTile(
+                        icon: icons.exportExcel,
+                        title: l10n.exportToExcel,
+                        onTap: () => _export(ExportFormat.excel),
+                      ),
+                      const Divider(height: 1),
+                      _SettingsTile(
+                        icon: icons.exportPdf,
+                        title: l10n.exportToPdf,
+                        onTap: () => _export(ExportFormat.pdf),
                       ),
                     ],
                   ),
@@ -227,8 +297,10 @@ class _AccountScreenState extends State<AccountScreen> {
                   _SettingsCard(
                     children: [
                       SwitchListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                        secondary: Icon(Icons.lock_outline_rounded, color: scheme.primary),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                        ),
+                        secondary: Icon(icons.lock, color: scheme.primary),
                         title: Text(l10n.securityAppLock),
                         subtitle: Text(
                           l10n.securityAppLockSubtitle,
@@ -243,8 +315,13 @@ class _AccountScreenState extends State<AccountScreen> {
                         const Divider(height: 1),
                         if (security.biometricAvailable)
                           SwitchListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                            secondary: Icon(Icons.fingerprint_rounded, color: scheme.primary),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                            ),
+                            secondary: Icon(
+                              icons.biometric,
+                              color: scheme.primary,
+                            ),
                             title: Text(l10n.securityBiometric),
                             subtitle: Text(
                               l10n.securityBiometricSubtitle,
@@ -255,9 +332,10 @@ class _AccountScreenState extends State<AccountScreen> {
                             value: security.biometricEnabled,
                             onChanged: (v) => _onBiometricToggle(v, security),
                           ),
-                        if (security.biometricAvailable) const Divider(height: 1),
+                        if (security.biometricAvailable)
+                          const Divider(height: 1),
                         _SettingsTile(
-                          icon: Icons.pin_outlined,
+                          icon: icons.pin,
                           title: l10n.securityChangePin,
                           onTap: _changePin,
                         ),
@@ -269,13 +347,127 @@ class _AccountScreenState extends State<AccountScreen> {
                   _SettingsCard(
                     children: [
                       _SettingsTile(
-                        icon: Icons.info_outline_rounded,
+                        icon: icons.about,
                         title: l10n.accountVersion,
                         trailingText: _version.isEmpty ? '—' : _version,
                       ),
                     ],
                   ),
                 ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Горизонтальная галерея карточек оформления — каждая показывает
+/// мини-превью своей палитры, чтобы выбор был визуальным, а не текстовым.
+class _AppearancePicker extends StatelessWidget {
+  final AppAppearance selected;
+  final AppLocalizations l10n;
+  final String Function(AppLocalizations, AppAppearance) label;
+  final ValueChanged<AppAppearance> onSelect;
+
+  const _AppearancePicker({
+    required this.selected,
+    required this.l10n,
+    required this.label,
+    required this.onSelect,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 108,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: AppTheme.all.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
+        itemBuilder: (_, i) {
+          final spec = AppTheme.all[i];
+          final isSelected = spec.id == selected;
+          return _AppearanceCard(
+            spec: spec,
+            label: label(l10n, spec.id),
+            selected: isSelected,
+            onTap: () => onSelect(spec.id),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _AppearanceCard extends StatelessWidget {
+  final AppearanceSpec spec;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _AppearanceCard({
+    required this.spec,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        width: 92,
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: selected
+                ? spec.seed
+                : theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
+            width: selected ? 2.2 : 1,
+          ),
+        ),
+        child: Column(
+          children: [
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [spec.seed, spec.accent],
+                  ),
+                ),
+                child: selected
+                    ? const Align(
+                        alignment: Alignment.topRight,
+                        child: Padding(
+                          padding: EdgeInsets.all(6),
+                          child: Icon(
+                            Icons.check_circle_rounded,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                        ),
+                      )
+                    : null,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.labelMedium?.copyWith(
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
               ),
             ),
           ],
@@ -311,9 +503,7 @@ class _SettingsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Column(children: children),
-    );
+    return Card(child: Column(children: children));
   }
 }
 
@@ -333,6 +523,7 @@ class _SettingsTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final icons = context.icons;
     return ListTile(
       leading: Icon(icon, color: scheme.primary),
       title: Text(title),
@@ -346,7 +537,7 @@ class _SettingsTile extends StatelessWidget {
             ),
           if (onTap != null) ...[
             const SizedBox(width: 4),
-            Icon(Icons.chevron_right_rounded, color: scheme.onSurfaceVariant),
+            Icon(icons.chevronRight, color: scheme.onSurfaceVariant),
           ],
         ],
       ),
@@ -355,13 +546,13 @@ class _SettingsTile extends StatelessWidget {
   }
 }
 
-class _ThemeOption extends StatelessWidget {
+class _OptionTile extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool selected;
   final VoidCallback onTap;
 
-  const _ThemeOption({
+  const _OptionTile({
     required this.icon,
     required this.label,
     required this.selected,
@@ -371,10 +562,14 @@ class _ThemeOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final icons = context.icons;
     return ListTile(
-      leading: Icon(icon, color: selected ? scheme.primary : scheme.onSurfaceVariant),
+      leading: Icon(
+        icon,
+        color: selected ? scheme.primary : scheme.onSurfaceVariant,
+      ),
       title: Text(label),
-      trailing: selected ? Icon(Icons.check_rounded, color: scheme.primary) : null,
+      trailing: selected ? Icon(icons.check, color: scheme.primary) : null,
       onTap: onTap,
     );
   }
@@ -396,10 +591,11 @@ class _LanguageOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final icons = context.icons;
     return ListTile(
       leading: Text(flag, style: const TextStyle(fontSize: 22)),
       title: Text(label),
-      trailing: selected ? Icon(Icons.check_rounded, color: scheme.primary) : null,
+      trailing: selected ? Icon(icons.check, color: scheme.primary) : null,
       onTap: onTap,
     );
   }

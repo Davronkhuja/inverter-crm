@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/enums.dart';
+import '../../../core/theme/app_icons.dart';
+import '../../../core/theme/app_icons_context.dart';
 import '../../../core/utils/enum_localizations.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../data/models/inverter.dart';
@@ -20,6 +22,8 @@ class InverterCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final icons = context.icons;
+    final isDark = theme.brightness == Brightness.dark;
     final inv = inverter;
 
     return Card(
@@ -31,27 +35,23 @@ class InverterCard extends StatelessWidget {
             children: [
               // Цветной "корешок" — модуль с инициалом модели.
               Container(
-                width: 46,
-                height: 46,
+                width: 48,
+                height: 48,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      scheme.primary.withValues(alpha: 0.18),
-                      scheme.primary.withValues(alpha: 0.06),
+                      scheme.primary.withValues(alpha: isDark ? 0.32 : 0.20),
+                      scheme.tertiary.withValues(alpha: isDark ? 0.18 : 0.08),
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(13),
                   border: Border.all(
                     color: scheme.primary.withValues(alpha: 0.18),
                   ),
                 ),
-                child: Icon(
-                  Icons.solar_power_outlined,
-                  color: scheme.primary,
-                  size: 22,
-                ),
+                child: Icon(icons.unit, color: scheme.primary, size: 22),
               ),
               const SizedBox(width: 13),
               Expanded(
@@ -73,7 +73,7 @@ class InverterCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        _replacementBadge(scheme, l10n),
+                        _replacementBadge(scheme, icons, l10n),
                       ],
                     ),
                     const SizedBox(height: 3),
@@ -84,21 +84,20 @@ class InverterCard extends StatelessWidget {
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: scheme.primary,
                         fontWeight: FontWeight.w600,
-                        fontFeatures: const [],
                       ),
                     ),
                     const SizedBox(height: 8),
                     _metaRow(
                       theme,
                       scheme,
-                      Icons.person_outline,
+                      icons.client,
                       inv.clientName.isEmpty ? '—' : inv.clientName,
                     ),
                     const SizedBox(height: 3),
                     _metaRow(
                       theme,
                       scheme,
-                      Icons.place_outlined,
+                      icons.location,
                       inv.locationLabel,
                     ),
                     const SizedBox(height: 9),
@@ -110,14 +109,14 @@ class InverterCard extends StatelessWidget {
                           StatusBadge(
                             label: inv.faultType.l10n(l10n),
                             color: scheme.tertiary,
-                            icon: Icons.warning_amber_rounded,
+                            icon: icons.fault,
                           ),
                         StatusBadge(
                           label: l10n.cardInstalledOn(
                             Formatters.date(inv.installationDate),
                           ),
                           color: scheme.onSurfaceVariant,
-                          icon: Icons.event_outlined,
+                          icon: icons.calendar,
                         ),
                       ],
                     ),
@@ -125,7 +124,7 @@ class InverterCard extends StatelessWidget {
                 ),
               ),
               Icon(
-                Icons.chevron_right_rounded,
+                icons.chevronRight,
                 color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
               ),
             ],
@@ -135,18 +134,22 @@ class InverterCard extends StatelessWidget {
     );
   }
 
-  Widget _replacementBadge(ColorScheme scheme, AppLocalizations l10n) {
+  Widget _replacementBadge(
+    ColorScheme scheme,
+    AppIconSet icons,
+    AppLocalizations l10n,
+  ) {
     if (inverter.replaced) {
       return StatusBadge(
         label: l10n.cardStatusReplaced,
         color: scheme.error,
-        icon: Icons.swap_horiz_rounded,
+        icon: icons.statusReplaced,
       );
     }
     return StatusBadge(
       label: l10n.cardStatusActive,
       color: const Color(0xFF2E9E5B),
-      icon: Icons.check_circle_outline,
+      icon: icons.statusActive,
     );
   }
 

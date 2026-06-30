@@ -45,11 +45,12 @@ class _InverterCrmAppState extends State<InverterCrmApp> {
       ],
       child: Consumer<SettingsProvider>(
         builder: (context, settings, _) {
+          final spec = settings.appearanceSpec;
           return MaterialApp(
             title: 'Inverter CRM',
             debugShowCheckedModeBanner: false,
-            theme: AppTheme.light(),
-            darkTheme: AppTheme.dark(),
+            theme: AppTheme.light(spec),
+            darkTheme: AppTheme.dark(spec),
             themeMode: settings.themeMode,
             locale: settings.locale,
             supportedLocales: AppLocalizations.supportedLocales,

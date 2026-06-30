@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/enums.dart';
+import '../../../core/theme/app_icons_context.dart';
 import '../../../core/utils/enum_localizations.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../l10n/app_localizations.dart';
@@ -58,6 +59,7 @@ class _FilterSheetState extends State<FilterSheet> {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final icons = context.icons;
 
     return SafeArea(
       child: Padding(
@@ -94,7 +96,10 @@ class _FilterSheetState extends State<FilterSheet> {
                   const Spacer(),
                   TextButton.icon(
                     onPressed: () => setState(
-                      () => _draft = InverterFilter(query: _draft.query),
+                      () => _draft = InverterFilter(
+                        query: _draft.query,
+                        replaced: ReplacedFilter.notReplaced,
+                      ),
                     ),
                     icon: const Icon(Icons.restart_alt_rounded, size: 18),
                     label: Text(l10n.filterReset),
@@ -166,6 +171,8 @@ class _FilterSheetState extends State<FilterSheet> {
               _dateRangeTile(
                 theme,
                 scheme,
+                icons.calendar,
+                icons.clear,
                 from: _draft.installedFrom,
                 to: _draft.installedTo,
                 onTap: () => _pickRange(installed: true),
@@ -182,6 +189,8 @@ class _FilterSheetState extends State<FilterSheet> {
               _dateRangeTile(
                 theme,
                 scheme,
+                icons.calendar,
+                icons.clear,
                 from: _draft.soldFrom,
                 to: _draft.soldTo,
                 onTap: () => _pickRange(installed: false),
@@ -211,7 +220,9 @@ class _FilterSheetState extends State<FilterSheet> {
 
   Widget _dateRangeTile(
     ThemeData theme,
-    ColorScheme scheme, {
+    ColorScheme scheme,
+    IconData calendarIcon,
+    IconData clearIcon, {
     required DateTime? from,
     required DateTime? to,
     required VoidCallback onTap,
@@ -228,7 +239,7 @@ class _FilterSheetState extends State<FilterSheet> {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
           child: Row(
             children: [
-              Icon(Icons.date_range_outlined, size: 18, color: scheme.primary),
+              Icon(calendarIcon, size: 18, color: scheme.primary),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -241,7 +252,7 @@ class _FilterSheetState extends State<FilterSheet> {
               if (onClear != null)
                 IconButton(
                   visualDensity: VisualDensity.compact,
-                  icon: const Icon(Icons.close_rounded, size: 18),
+                  icon: Icon(clearIcon, size: 18),
                   onPressed: onClear,
                 ),
             ],

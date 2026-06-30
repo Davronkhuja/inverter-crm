@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_icons_context.dart';
 import '../../l10n/app_localizations.dart';
 import '../account/account_screen.dart';
 import '../dashboard/dashboard_screen.dart';
@@ -21,6 +22,7 @@ class _RootShellState extends State<RootShell> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final icons = context.icons;
 
     final screens = const [
       DashboardScreen(),
@@ -35,18 +37,18 @@ class _RootShellState extends State<RootShell> {
         onDestinationSelected: (i) => setState(() => _index = i),
         destinations: [
           NavigationDestination(
-            icon: const Icon(Icons.dashboard_outlined),
-            selectedIcon: const Icon(Icons.dashboard_rounded),
+            icon: Icon(icons.navDashboard),
+            selectedIcon: Icon(icons.navDashboardSelected),
             label: l10n.navDashboard,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.warehouse_outlined),
-            selectedIcon: const Icon(Icons.warehouse_rounded),
+            icon: Icon(icons.navWarehouse),
+            selectedIcon: Icon(icons.navWarehouseSelected),
             label: l10n.navWarehouse,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.person_outline_rounded),
-            selectedIcon: const Icon(Icons.person_rounded),
+            icon: Icon(icons.navAccount),
+            selectedIcon: Icon(icons.navAccountSelected),
             label: l10n.navAccount,
           ),
         ],

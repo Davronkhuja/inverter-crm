@@ -193,6 +193,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fieldSolution => 'Solution';
 
   @override
+  String get fieldApprovedBy => 'Approved by';
+
+  @override
   String get sectionReplacement => 'Replacement';
 
   @override
@@ -496,6 +499,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountTheme => 'Theme';
+
+  @override
+  String get appearanceLabel => 'Style';
+
+  @override
+  String get appearancePower => 'Power';
+
+  @override
+  String get appearanceNature => 'Nature';
+
+  @override
+  String get appearanceTech => 'Tech';
+
+  @override
+  String get accountDataExport => 'Data export';
+
+  @override
+  String get exportDescription =>
+      'Export the inverters currently visible on the dashboard.';
 
   @override
   String get themeSystem => 'System';

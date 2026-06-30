@@ -7,6 +7,8 @@ import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 
 import '../../core/constants/enums.dart';
+import '../../core/theme/app_icons.dart';
+import '../../core/theme/app_icons_context.dart';
 import '../../core/utils/enum_localizations.dart';
 import '../../core/utils/formatters.dart';
 import '../../data/models/inverter.dart';
@@ -94,11 +96,12 @@ class _DetailScreenState extends State<DetailScreen> {
 
   Future<void> _delete(Inverter inv) async {
     final l10n = AppLocalizations.of(context)!;
+    final icons = context.icons;
     final provider = context.read<InverterProvider>();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        icon: const Icon(Icons.delete_outline_rounded),
+        icon: Icon(icons.delete),
         title: Text(l10n.detailDeleteConfirmTitle),
         content: Text(l10n.detailDeleteConfirmMessage),
         actions: [
@@ -158,7 +161,7 @@ class _DetailScreenState extends State<DetailScreen> {
               top: 4,
               right: 4,
               child: IconButton(
-                icon: const Icon(Icons.close_rounded, color: Colors.white),
+                icon: Icon(context.icons.clear, color: Colors.white),
                 onPressed: () => Navigator.pop(context),
               ),
             ),
@@ -177,6 +180,7 @@ class _DetailScreenState extends State<DetailScreen> {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final icons = context.icons;
     final provider = context.watch<InverterProvider>();
     final all = provider.all;
 
@@ -215,12 +219,12 @@ class _DetailScreenState extends State<DetailScreen> {
             actions: [
               IconButton(
                 tooltip: l10n.detailEdit,
-                icon: const Icon(Icons.edit_outlined),
+                icon: Icon(icons.edit),
                 onPressed: () => _edit(inv!),
               ),
               IconButton(
                 tooltip: l10n.detailDelete,
-                icon: const Icon(Icons.delete_outline_rounded),
+                icon: Icon(icons.delete),
                 onPressed: () => _delete(inv!),
               ),
               const SizedBox(width: 4),
@@ -239,58 +243,58 @@ class _DetailScreenState extends State<DetailScreen> {
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              background: _HeaderBackground(inverter: inv),
+              background: _HeaderBackground(icon: icons.unit),
             ),
           ),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 40),
             sliver: SliverList.list(
               children: [
-                _statusRow(theme, scheme, inv, l10n),
+                _statusRow(theme, scheme, icons, inv, l10n),
                 const SizedBox(height: 14),
 
                 if (replacement != null || predecessor != null) ...[
-                  _linkBanner(theme, scheme, inv, replacement, predecessor, l10n),
+                  _linkBanner(theme, scheme, icons, inv, replacement, predecessor, l10n),
                   const SizedBox(height: 14),
                 ],
 
                 SectionCard(
                   title: l10n.detailGeneralInfo,
-                  icon: Icons.info_outline_rounded,
+                  icon: icons.about,
                   child: Column(
                     children: [
                       InfoTile(
-                        icon: Icons.tag_rounded,
+                        icon: icons.orderNo,
                         label: l10n.fieldOrderNoLabel,
                         value: inv.orderNo,
                       ),
                       InfoTile(
-                        icon: Icons.qr_code_2_rounded,
+                        icon: icons.asn,
                         label: l10n.fieldAsnLabel,
                         value: inv.asn,
                       ),
                       InfoTile(
-                        icon: Icons.memory_rounded,
+                        icon: icons.model,
                         label: l10n.fieldModelLabel,
                         value: inv.model,
                       ),
                       InfoTile(
-                        icon: Icons.person_outline,
+                        icon: icons.client,
                         label: l10n.fieldClientLabel,
                         value: inv.clientName,
                       ),
                       InfoTile(
-                        icon: Icons.place_outlined,
+                        icon: icons.location,
                         label: l10n.fieldInstallLocationLabel,
                         value: inv.locationLabel,
                       ),
                       InfoTile(
-                        icon: Icons.event_available_outlined,
+                        icon: icons.calendar,
                         label: l10n.fieldInstallationDate,
                         value: Formatters.date(inv.installationDate),
                       ),
                       InfoTile(
-                        icon: Icons.sell_outlined,
+                        icon: icons.calendar,
                         label: l10n.fieldSaleDate,
                         value: Formatters.date(inv.saleDate),
                       ),
@@ -301,26 +305,32 @@ class _DetailScreenState extends State<DetailScreen> {
 
                 SectionCard(
                   title: l10n.detailFaultSection,
-                  icon: Icons.warning_amber_rounded,
+                  icon: icons.statFaults,
                   child: Column(
                     children: [
                       InfoTile(
-                        icon: Icons.category_outlined,
+                        icon: icons.fault,
                         label: l10n.fieldFaultType,
                         value: inv.faultType == FaultType.none
                             ? l10n.detailNoFault
                             : inv.faultType.l10n(l10n),
                       ),
                       InfoTile(
-                        icon: Icons.description_outlined,
+                        icon: icons.description,
                         label: l10n.fieldFaultDescription,
                         value: inv.faultDescription,
                       ),
                       InfoTile(
-                        icon: Icons.build_outlined,
+                        icon: icons.solution,
                         label: l10n.fieldSolution,
                         value: inv.solution,
                       ),
+                      if (inv.approvedBy.trim().isNotEmpty)
+                        InfoTile(
+                          icon: icons.technician,
+                          label: l10n.fieldApprovedBy,
+                          value: inv.approvedBy,
+                        ),
                     ],
                   ),
                 ),
@@ -328,15 +338,15 @@ class _DetailScreenState extends State<DetailScreen> {
 
                 SectionCard(
                   title: l10n.detailReplacementSection,
-                  icon: Icons.swap_horiz_rounded,
-                  child: _replacementBody(theme, scheme, inv, replacement, l10n),
+                  icon: icons.swap,
+                  child: _replacementBody(theme, scheme, icons, inv, replacement, l10n),
                 ),
                 const SizedBox(height: 12),
 
                 if (chain.length > 1) ...[
                   SectionCard(
                     title: l10n.detailReplacementHistory,
-                    icon: Icons.timeline_rounded,
+                    icon: icons.history,
                     child: ReplacementChain(
                       chain: chain,
                       currentAsn: inv.asn,
@@ -346,13 +356,13 @@ class _DetailScreenState extends State<DetailScreen> {
                   const SizedBox(height: 12),
                 ],
 
-                _serviceLog(theme, scheme, inv, l10n),
+                _serviceLog(theme, scheme, icons, inv, l10n),
                 const SizedBox(height: 12),
 
                 if (inv.photos.isNotEmpty) ...[
                   SectionCard(
                     title: l10n.detailPhotos,
-                    icon: Icons.photo_library_outlined,
+                    icon: icons.photo,
                     child: _photoGrid(inv),
                   ),
                   const SizedBox(height: 12),
@@ -361,8 +371,8 @@ class _DetailScreenState extends State<DetailScreen> {
                 if (inv.documents.isNotEmpty) ...[
                   SectionCard(
                     title: l10n.detailDocuments,
-                    icon: Icons.folder_outlined,
-                    child: _documentList(theme, scheme, inv),
+                    icon: icons.document,
+                    child: _documentList(theme, scheme, icons, inv),
                   ),
                   const SizedBox(height: 12),
                 ],
@@ -370,7 +380,7 @@ class _DetailScreenState extends State<DetailScreen> {
                 if (inv.notes.trim().isNotEmpty)
                   SectionCard(
                     title: l10n.detailNotes,
-                    icon: Icons.notes_rounded,
+                    icon: icons.notes,
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: Text(inv.notes, style: theme.textTheme.bodyLarge),
@@ -387,6 +397,7 @@ class _DetailScreenState extends State<DetailScreen> {
   Widget _statusRow(
     ThemeData theme,
     ColorScheme scheme,
+    AppIconSet icons,
     Inverter inv,
     AppLocalizations l10n,
   ) {
@@ -398,20 +409,20 @@ class _DetailScreenState extends State<DetailScreen> {
             ? StatusBadge(
                 label: l10n.cardStatusReplaced,
                 color: scheme.error,
-                icon: Icons.swap_horiz_rounded,
+                icon: icons.statusReplaced,
                 subtle: false,
               )
             : StatusBadge(
                 label: l10n.cardStatusActive,
                 color: const Color(0xFF2E9E5B),
-                icon: Icons.check_circle_outline,
+                icon: icons.statusActive,
                 subtle: false,
               ),
         if (inv.faultType != FaultType.none)
           StatusBadge(
             label: inv.faultType.l10n(l10n),
             color: scheme.tertiary,
-            icon: Icons.warning_amber_rounded,
+            icon: icons.fault,
           ),
         if (inv.replaced)
           StatusBadge(
@@ -426,6 +437,7 @@ class _DetailScreenState extends State<DetailScreen> {
   Widget _linkBanner(
     ThemeData theme,
     ColorScheme scheme,
+    AppIconSet icons,
     Inverter inv,
     Inverter? replacement,
     Inverter? predecessor,
@@ -435,7 +447,7 @@ class _DetailScreenState extends State<DetailScreen> {
     if (predecessor != null) {
       children.add(
         _LinkTile(
-          icon: Icons.subdirectory_arrow_right_rounded,
+          icon: icons.arrowOutward,
           caption: l10n.detailReplacementFor,
           asn: predecessor.asn,
           model: predecessor.model,
@@ -447,7 +459,7 @@ class _DetailScreenState extends State<DetailScreen> {
     if (replacement != null) {
       children.add(
         _LinkTile(
-          icon: Icons.swap_horiz_rounded,
+          icon: icons.swap,
           caption: l10n.detailReplacedBy,
           asn: replacement.asn,
           model: replacement.model,
@@ -469,6 +481,7 @@ class _DetailScreenState extends State<DetailScreen> {
   Widget _replacementBody(
     ThemeData theme,
     ColorScheme scheme,
+    AppIconSet icons,
     Inverter inv,
     Inverter? replacement,
     AppLocalizations l10n,
@@ -477,7 +490,7 @@ class _DetailScreenState extends State<DetailScreen> {
       return Row(
         children: [
           Icon(
-            Icons.check_circle_outline,
+            icons.statusActive,
             size: 18,
             color: const Color(0xFF2E9E5B),
           ),
@@ -496,12 +509,12 @@ class _DetailScreenState extends State<DetailScreen> {
     return Column(
       children: [
         InfoTile(
-          icon: Icons.inventory_2_outlined,
+          icon: icons.inventory,
           label: l10n.detailOldLocationField,
           value: inv.oldInverterLocation.l10n(l10n),
         ),
         InfoTile(
-          icon: Icons.swap_horiz_rounded,
+          icon: icons.swap,
           label: l10n.detailNewAsnField,
           valueWidget: replacement == null
               ? Text(
@@ -513,6 +526,7 @@ class _DetailScreenState extends State<DetailScreen> {
                 )
               : _AsnLink(
                   asn: replacement.asn,
+                  icon: icons.openExternal,
                   onTap: () => _openInverter(replacement),
                 ),
         ),
@@ -523,15 +537,16 @@ class _DetailScreenState extends State<DetailScreen> {
   Widget _serviceLog(
     ThemeData theme,
     ColorScheme scheme,
+    AppIconSet icons,
     Inverter inv,
     AppLocalizations l10n,
   ) {
     return SectionCard(
       title: l10n.detailFaultRepairHistory,
-      icon: Icons.history_rounded,
+      icon: icons.history,
       trailing: IconButton(
         visualDensity: VisualDensity.compact,
-        icon: const Icon(Icons.add_circle_outline_rounded),
+        icon: Icon(icons.add),
         tooltip: l10n.detailAddEvent,
         onPressed: () => _addEvent(inv.asn),
       ),
@@ -551,7 +566,7 @@ class _DetailScreenState extends State<DetailScreen> {
               child: Row(
                 children: [
                   Icon(
-                    Icons.event_note_outlined,
+                    icons.history,
                     size: 18,
                     color: scheme.onSurfaceVariant,
                   ),
@@ -639,7 +654,7 @@ class _DetailScreenState extends State<DetailScreen> {
           IconButton(
             visualDensity: VisualDensity.compact,
             icon: Icon(
-              Icons.close_rounded,
+              context.icons.clear,
               size: 18,
               color: scheme.onSurfaceVariant,
             ),
@@ -668,7 +683,7 @@ class _DetailScreenState extends State<DetailScreen> {
                 fit: BoxFit.cover,
                 errorBuilder: (_, _, _) => Container(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  child: const Icon(Icons.broken_image_outlined),
+                  child: Icon(context.icons.photo),
                 ),
               ),
             ),
@@ -677,22 +692,24 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 
-  Widget _documentList(ThemeData theme, ColorScheme scheme, Inverter inv) {
+  Widget _documentList(
+    ThemeData theme,
+    ColorScheme scheme,
+    AppIconSet icons,
+    Inverter inv,
+  ) {
     return Column(
       children: [
         for (final path in inv.documents)
           ListTile(
             contentPadding: EdgeInsets.zero,
-            leading: Icon(
-              Icons.insert_drive_file_outlined,
-              color: scheme.primary,
-            ),
+            leading: Icon(icons.document, color: scheme.primary),
             title: Text(
               p.basename(path),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            trailing: const Icon(Icons.ios_share_outlined, size: 18),
+            trailing: Icon(icons.share, size: 18),
             onTap: () => _openDocument(path),
           ),
       ],
@@ -703,8 +720,9 @@ class _DetailScreenState extends State<DetailScreen> {
 /// Кликабельный ASN — открывает связанный инвертор.
 class _AsnLink extends StatelessWidget {
   final String asn;
+  final IconData icon;
   final VoidCallback onTap;
-  const _AsnLink({required this.asn, required this.onTap});
+  const _AsnLink({required this.asn, required this.icon, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -731,7 +749,7 @@ class _AsnLink extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 4),
-            Icon(Icons.open_in_new_rounded, size: 15, color: scheme.primary),
+            Icon(icon, size: 15, color: scheme.primary),
           ],
         ),
       ),
@@ -813,7 +831,7 @@ class _LinkTile extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right_rounded, color: color),
+              Icon(context.icons.chevronRight, color: color),
             ],
           ),
         ),
@@ -823,8 +841,8 @@ class _LinkTile extends StatelessWidget {
 }
 
 class _HeaderBackground extends StatelessWidget {
-  final Inverter inverter;
-  const _HeaderBackground({required this.inverter});
+  final IconData icon;
+  const _HeaderBackground({required this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -842,7 +860,7 @@ class _HeaderBackground extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.only(top: 60, right: 18),
           child: Icon(
-            Icons.solar_power_outlined,
+            icon,
             size: 92,
             color: scheme.primary.withValues(alpha: 0.12),
           ),
@@ -912,6 +930,7 @@ class _AddEventSheetState extends State<_AddEventSheet> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    final icons = context.icons;
     return Padding(
       padding: EdgeInsets.only(
         left: 20,
@@ -950,7 +969,7 @@ class _AddEventSheetState extends State<_AddEventSheet> {
                 textCapitalization: TextCapitalization.sentences,
                 decoration: InputDecoration(
                   labelText: l10n.eventTitleField,
-                  prefixIcon: const Icon(Icons.title_rounded),
+                  prefixIcon: Icon(icons.description),
                 ),
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? l10n.eventRequired : null,
@@ -962,7 +981,7 @@ class _AddEventSheetState extends State<_AddEventSheet> {
                 textCapitalization: TextCapitalization.sentences,
                 decoration: InputDecoration(
                   labelText: l10n.eventDescriptionField,
-                  prefixIcon: const Icon(Icons.notes_rounded),
+                  prefixIcon: Icon(icons.notes),
                   alignLabelWithHint: true,
                 ),
               ),
@@ -972,7 +991,7 @@ class _AddEventSheetState extends State<_AddEventSheet> {
                 textCapitalization: TextCapitalization.words,
                 decoration: InputDecoration(
                   labelText: l10n.eventTechnicianField,
-                  prefixIcon: const Icon(Icons.engineering_outlined),
+                  prefixIcon: Icon(icons.technician),
                 ),
               ),
               const SizedBox(height: 12),
@@ -982,7 +1001,7 @@ class _AddEventSheetState extends State<_AddEventSheet> {
                 child: InputDecorator(
                   decoration: InputDecoration(
                     labelText: l10n.eventDateField,
-                    prefixIcon: const Icon(Icons.event_outlined),
+                    prefixIcon: Icon(icons.calendar),
                   ),
                   child: Text(Formatters.date(_date)),
                 ),

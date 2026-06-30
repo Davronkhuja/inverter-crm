@@ -454,6 +454,12 @@ abstract class AppLocalizations {
   /// **'Solution'**
   String get fieldSolution;
 
+  /// No description provided for @fieldApprovedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved by'**
+  String get fieldApprovedBy;
+
   /// No description provided for @sectionReplacement.
   ///
   /// In en, this message translates to:
@@ -1029,6 +1035,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Theme'**
   String get accountTheme;
+
+  /// No description provided for @appearanceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Style'**
+  String get appearanceLabel;
+
+  /// No description provided for @appearancePower.
+  ///
+  /// In en, this message translates to:
+  /// **'Power'**
+  String get appearancePower;
+
+  /// No description provided for @appearanceNature.
+  ///
+  /// In en, this message translates to:
+  /// **'Nature'**
+  String get appearanceNature;
+
+  /// No description provided for @appearanceTech.
+  ///
+  /// In en, this message translates to:
+  /// **'Tech'**
+  String get appearanceTech;
+
+  /// No description provided for @accountDataExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Data export'**
+  String get accountDataExport;
+
+  /// No description provided for @exportDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Export the inverters currently visible on the dashboard.'**
+  String get exportDescription;
 
   /// No description provided for @themeSystem.
   ///

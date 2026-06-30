@@ -20,7 +20,9 @@ class InverterProvider extends ChangeNotifier {
   List<Inverter> _all = [];
   List<Inverter> get all => List.unmodifiable(_all);
 
-  InverterFilter _filter = const InverterFilter();
+  InverterFilter _filter = const InverterFilter(
+    replaced: ReplacedFilter.notReplaced,
+  );
   InverterFilter get filter => _filter;
 
   /// Отфильтрованный и отсортированный список для дашборда.
@@ -83,7 +85,10 @@ class InverterProvider extends ChangeNotifier {
   }
 
   void clearFilters() {
-    _filter = InverterFilter(query: _filter.query);
+    _filter = InverterFilter(
+      query: _filter.query,
+      replaced: ReplacedFilter.notReplaced,
+    );
     notifyListeners();
   }
 

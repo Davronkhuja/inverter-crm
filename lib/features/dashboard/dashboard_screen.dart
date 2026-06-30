@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/theme/app_icons_context.dart';
 import '../../data/models/inverter.dart';
 import '../../l10n/app_localizations.dart';
-import '../../state/inverter_provider.dart';
 import '../../state/inverter_filter.dart';
-import '../../state/settings_provider.dart';
+import '../../state/inverter_provider.dart';
 import '../detail/detail_screen.dart';
-import '../export/export_service.dart';
 import '../form/inverter_form_screen.dart';
 import 'widgets/filter_sheet.dart';
 import 'widgets/inverter_card.dart';
 
 /// Главный экран CRM: статистика, поиск, фильтры и список инверторов.
+/// Переключатель темы и экспорт перенесены в Account — здесь только
+/// рабочий процесс с данными.
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -56,32 +57,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     ).push(MaterialPageRoute(builder: (_) => const InverterFormScreen()));
   }
 
-  Future<void> _export(InverterProvider provider, ExportFormat format) async {
-    final l10n = AppLocalizations.of(context)!;
-    final visible = provider.visible;
-    if (visible.isEmpty) {
-      _toast(l10n.exportNothing);
-      return;
-    }
-    try {
-      await ExportService().export(visible, format);
-    } catch (e) {
-      _toast(l10n.exportFailed(e.toString()));
-    }
-  }
-
-  void _toast(String msg) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final icons = context.icons;
     final provider = context.watch<InverterProvider>();
-    final settings = context.watch<SettingsProvider>();
 
     return Scaffold(
       body: SafeArea(
@@ -94,53 +76,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 pinned: true,
                 floating: true,
                 titleSpacing: 20,
-                title: _AppTitle(title: l10n.appTitle),
-                actions: [
-                  IconButton(
-                    tooltip: l10n.toggleTheme,
-                    icon: Icon(
-                      settings.themeMode == ThemeMode.dark
-                          ? Icons.light_mode_outlined
-                          : Icons.dark_mode_outlined,
-                    ),
-                    onPressed: () {
-                      final isDark = settings.themeMode == ThemeMode.dark;
-                      settings.setThemeMode(
-                        isDark ? ThemeMode.light : ThemeMode.dark,
-                      );
-                    },
-                  ),
-                  PopupMenuButton<ExportFormat>(
-                    tooltip: l10n.exportTooltip,
-                    icon: const Icon(Icons.ios_share_outlined),
-                    onSelected: (f) => _export(provider, f),
-                    itemBuilder: (_) => [
-                      PopupMenuItem(
-                        value: ExportFormat.excel,
-                        child: ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: const Icon(Icons.table_chart_outlined),
-                          title: Text(l10n.exportToExcel),
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: ExportFormat.pdf,
-                        child: ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: const Icon(Icons.picture_as_pdf_outlined),
-                          title: Text(l10n.exportToPdf),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: 4),
-                ],
+                title: _AppTitle(title: l10n.appTitle, icon: icons.brand),
               ),
 
-              // Статистика.
+              // Статистика — мягкие gradient-карточки.
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 14),
                   child: _StatsRow(provider: provider, l10n: l10n),
                 ),
               ),
@@ -158,11 +100,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           textInputAction: TextInputAction.search,
                           decoration: InputDecoration(
                             hintText: l10n.searchHint,
-                            prefixIcon: const Icon(Icons.search_rounded),
+                            prefixIcon: Icon(icons.search),
                             suffixIcon: provider.filter.query.isEmpty
                                 ? null
                                 : IconButton(
-                                    icon: const Icon(Icons.close_rounded),
+                                    icon: Icon(icons.clear),
                                     onPressed: () {
                                       _searchController.clear();
                                       provider.setQuery('');
@@ -173,6 +115,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       const SizedBox(width: 10),
                       _FilterButton(
+                        icon: icons.filter,
                         count: provider.filter.activeCount,
                         onTap: () => _openFilters(provider),
                       ),
@@ -217,7 +160,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addNew,
-        icon: const Icon(Icons.add_rounded),
+        icon: Icon(icons.add),
         label: Text(l10n.addInverter),
       ),
     );
@@ -229,6 +172,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     ColorScheme scheme,
     AppLocalizations l10n,
   ) {
+    final icons = context.icons;
     if (provider.loading) {
       return [
         const SliverFillRemaining(
@@ -242,7 +186,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         SliverFillRemaining(
           hasScrollBody: false,
           child: _EmptyState(
-            icon: Icons.error_outline_rounded,
+            icon: icons.fault,
             title: l10n.errorTitle,
             message: provider.error!,
             actionLabel: l10n.retry,
@@ -259,7 +203,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         SliverFillRemaining(
           hasScrollBody: false,
           child: _EmptyState(
-            icon: filtered ? Icons.search_off_rounded : Icons.inbox_outlined,
+            icon: filtered ? icons.search : icons.inventory,
             title: filtered ? l10n.emptyNoMatchesTitle : l10n.emptyNoDataTitle,
             message: filtered
                 ? l10n.emptyNoMatchesMessage
@@ -288,7 +232,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
 class _AppTitle extends StatelessWidget {
   final String title;
-  const _AppTitle({required this.title});
+  final IconData icon;
+  const _AppTitle({required this.title, required this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -296,15 +241,26 @@ class _AppTitle extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 32,
-          height: 32,
+          width: 34,
+          height: 34,
           decoration: BoxDecoration(
-            color: scheme.primary,
-            borderRadius: BorderRadius.circular(9),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [scheme.primary, scheme.primary.withValues(alpha: 0.65)],
+            ),
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: scheme.primary.withValues(alpha: 0.35),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
           ),
-          child: const Icon(Icons.bolt_rounded, color: Colors.white, size: 20),
+          child: Icon(icon, color: Colors.white, size: 19),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 11),
         Text(title),
       ],
     );
@@ -319,13 +275,14 @@ class _StatsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final icons = context.icons;
     return Row(
       children: [
         Expanded(
           child: _StatCard(
             value: provider.totalCount.toString(),
             label: l10n.statTotalUnits,
-            icon: Icons.solar_power_outlined,
+            icon: icons.statTotalUnits,
             color: scheme.primary,
           ),
         ),
@@ -334,7 +291,7 @@ class _StatsRow extends StatelessWidget {
           child: _StatCard(
             value: provider.replacedCount.toString(),
             label: l10n.statReplaced,
-            icon: Icons.swap_horiz_rounded,
+            icon: icons.statReplaced,
             color: scheme.error,
           ),
         ),
@@ -343,7 +300,7 @@ class _StatsRow extends StatelessWidget {
           child: _StatCard(
             value: provider.activeFaultCount.toString(),
             label: l10n.statOpenFaults,
-            icon: Icons.warning_amber_rounded,
+            icon: icons.statFaults,
             color: scheme.tertiary,
           ),
         ),
@@ -352,6 +309,8 @@ class _StatsRow extends StatelessWidget {
   }
 }
 
+/// Карточка статистики с мягким градиентным фоном в цвете акцента —
+/// современный, "лёгкий" вид вместо плоской заливки.
 class _StatCard extends StatelessWidget {
   final String value;
   final String label;
@@ -368,41 +327,65 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(13, 13, 10, 13),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: color, size: 20),
-            const SizedBox(height: 10),
-            Text(
-              value,
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.5,
-              ),
-            ),
-            const SizedBox(height: 1),
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
+    final isDark = theme.brightness == Brightness.dark;
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.withValues(alpha: isDark ? 0.22 : 0.14),
+            color.withValues(alpha: isDark ? 0.06 : 0.03),
           ],
         ),
+        border: Border.all(color: color.withValues(alpha: isDark ? 0.3 : 0.16)),
+      ),
+      padding: const EdgeInsets.fromLTRB(14, 14, 10, 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 30,
+            height: 30,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: isDark ? 0.28 : 0.16),
+              borderRadius: BorderRadius.circular(9),
+            ),
+            child: Icon(icon, color: color, size: 17),
+          ),
+          const SizedBox(height: 11),
+          Text(
+            value,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 1),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
 class _FilterButton extends StatelessWidget {
+  final IconData icon;
   final int count;
   final VoidCallback onTap;
-  const _FilterButton({required this.count, required this.onTap});
+  const _FilterButton({
+    required this.icon,
+    required this.count,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -423,10 +406,7 @@ class _FilterButton extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.tune_rounded,
-                color: active ? Colors.white : scheme.onSurfaceVariant,
-              ),
+              Icon(icon, color: active ? Colors.white : scheme.onSurfaceVariant),
               if (active) ...[
                 const SizedBox(width: 7),
                 Text(

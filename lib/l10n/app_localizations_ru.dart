@@ -193,6 +193,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get fieldSolution => 'Решение';
 
   @override
+  String get fieldApprovedBy => 'Утверждено';
+
+  @override
   String get sectionReplacement => 'Замена';
 
   @override
@@ -497,6 +500,25 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get accountTheme => 'Тема';
+
+  @override
+  String get appearanceLabel => 'Стиль';
+
+  @override
+  String get appearancePower => 'Энергия';
+
+  @override
+  String get appearanceNature => 'Природа';
+
+  @override
+  String get appearanceTech => 'Техно';
+
+  @override
+  String get accountDataExport => 'Экспорт данных';
+
+  @override
+  String get exportDescription =>
+      'Экспортировать инверторы, видимые сейчас на дашборде.';
 
   @override
   String get themeSystem => 'Системная';

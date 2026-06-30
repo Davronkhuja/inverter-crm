@@ -40,6 +40,8 @@ class Inverter {
   /// Текущее местонахождение старого (заменённого) инвертора.
   final OldInverterLocation oldInverterLocation;
 
+  final String approvedBy;
+
   final String notes;
 
   /// Пути к прикреплённым фотографиям.
@@ -68,6 +70,7 @@ class Inverter {
     this.replaced = false,
     this.newAsn,
     this.oldInverterLocation = OldInverterLocation.warehouse,
+    this.approvedBy = '',
     this.notes = '',
     this.photos = const [],
     this.documents = const [],
@@ -102,6 +105,7 @@ class Inverter {
     String? newAsn,
     bool clearNewAsn = false,
     OldInverterLocation? oldInverterLocation,
+    String? approvedBy,
     String? notes,
     List<String>? photos,
     List<String>? documents,
@@ -125,6 +129,7 @@ class Inverter {
       replaced: replaced ?? this.replaced,
       newAsn: clearNewAsn ? null : (newAsn ?? this.newAsn),
       oldInverterLocation: oldInverterLocation ?? this.oldInverterLocation,
+      approvedBy: approvedBy ?? this.approvedBy,
       notes: notes ?? this.notes,
       photos: photos ?? this.photos,
       documents: documents ?? this.documents,
@@ -151,6 +156,7 @@ class Inverter {
       'replaced': replaced ? 1 : 0,
       'new_asn': newAsn,
       'old_location': oldInverterLocation.name,
+      'approved_by': approvedBy,
       'notes': notes,
       'photos': jsonEncode(photos),
       'documents': jsonEncode(documents),
@@ -190,6 +196,7 @@ class Inverter {
       oldInverterLocation: OldInverterLocation.fromName(
         map['old_location'] as String?,
       ),
+      approvedBy: (map['approved_by'] as String?) ?? '',
       notes: (map['notes'] as String?) ?? '',
       photos: decodeList(map['photos']),
       documents: decodeList(map['documents']),

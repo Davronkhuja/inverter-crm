@@ -42,7 +42,8 @@ class InverterFilter {
   });
 
   bool get hasActiveFilters =>
-      replaced != ReplacedFilter.any ||
+      replaced == ReplacedFilter.replaced ||
+      replaced == ReplacedFilter.any ||
       faultType != null ||
       model != null ||
       installedFrom != null ||
@@ -52,7 +53,9 @@ class InverterFilter {
 
   int get activeCount {
     var n = 0;
-    if (replaced != ReplacedFilter.any) n++;
+    if (replaced == ReplacedFilter.replaced || replaced == ReplacedFilter.any) {
+      n++;
+    }
     if (faultType != null) n++;
     if (model != null) n++;
     if (installedFrom != null || installedTo != null) n++;

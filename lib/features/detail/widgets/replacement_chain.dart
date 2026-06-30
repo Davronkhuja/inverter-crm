@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_icons.dart';
+import '../../../core/theme/app_icons_context.dart';
 import '../../../data/models/inverter.dart';
 import '../../../l10n/app_localizations.dart';
 
@@ -22,11 +24,12 @@ class ReplacementChain extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context)!;
+    final icons = context.icons;
 
     return Column(
       children: [
         for (var i = 0; i < chain.length; i++) ...[
-          _node(theme, scheme, l10n, chain[i], i),
+          _node(theme, scheme, icons, l10n, chain[i], i),
           if (i < chain.length - 1) _connector(scheme),
         ],
       ],
@@ -34,12 +37,13 @@ class ReplacementChain extends StatelessWidget {
   }
 
   Widget _node(
-      ThemeData theme,
-      ColorScheme scheme,
-      AppLocalizations l10n,
-      Inverter inv,
-      int index,
-      ) {
+    ThemeData theme,
+    ColorScheme scheme,
+    AppIconSet icons,
+    AppLocalizations l10n,
+    Inverter inv,
+    int index,
+  ) {
     final isCurrent = inv.asn == currentAsn;
     final isLast = index == chain.length - 1;
     return Material(
@@ -73,9 +77,7 @@ class ReplacementChain extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  isLast && !inv.replaced
-                      ? Icons.check_rounded
-                      : Icons.bolt_rounded,
+                  isLast && !inv.replaced ? icons.check : icons.unit,
                   size: 17,
                   color: isLast && !inv.replaced
                       ? const Color(0xFF2E9E5B)
@@ -134,7 +136,7 @@ class ReplacementChain extends StatelessWidget {
               ),
               if (!isCurrent)
                 Icon(
-                  Icons.arrow_outward_rounded,
+                  icons.arrowOutward,
                   size: 18,
                   color: scheme.onSurfaceVariant,
                 ),

@@ -195,6 +195,9 @@ class AppLocalizationsUz extends AppLocalizations {
   String get fieldSolution => 'Yechim';
 
   @override
+  String get fieldApprovedBy => 'Tasdiqlagan';
+
+  @override
   String get sectionReplacement => 'Almashtirish';
 
   @override
@@ -500,6 +503,25 @@ class AppLocalizationsUz extends AppLocalizations {
 
   @override
   String get accountTheme => 'Mavzu';
+
+  @override
+  String get appearanceLabel => 'Uslub';
+
+  @override
+  String get appearancePower => 'Quvvat';
+
+  @override
+  String get appearanceNature => 'Tabiat';
+
+  @override
+  String get appearanceTech => 'Texno';
+
+  @override
+  String get accountDataExport => 'Ma’lumotlarni eksport qilish';
+
+  @override
+  String get exportDescription =>
+      'Hozir dashboard’da ko‘rinayotgan inverterlarni eksport qiling.';
 
   @override
   String get themeSystem => 'Tizim';

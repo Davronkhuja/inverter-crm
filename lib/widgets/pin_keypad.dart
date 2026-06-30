@@ -92,7 +92,7 @@ class PinKeypad extends StatelessWidget {
                   child: Icon(biometricIcon, size: 26),
                 )
               else
-                const _KeypadButton(child: SizedBox.shrink(), onTap: null),
+                const _KeypadButton(onTap: null, child: SizedBox.shrink()),
               _KeypadButton(
                 onTap: () {
                   HapticFeedback.selectionClick();

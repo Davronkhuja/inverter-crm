@@ -156,6 +156,12 @@ class AppLocalizationsUz extends AppLocalizations {
   String get fieldAsn => 'Inverter ASN (seriya raqami) *';
 
   @override
+  String get fieldDataloggerSn => 'Datalogger SN';
+
+  @override
+  String get fieldInverterSn => 'Inverter SN';
+
+  @override
   String get fieldClientName => 'Mijoz ismi *';
 
   @override

@@ -42,6 +42,9 @@ class Inverter {
 
   final String approvedBy;
 
+  final String dataloggerSn;
+  final String inverterSn;
+
   final String notes;
 
   /// Пути к прикреплённым фотографиям.
@@ -71,6 +74,8 @@ class Inverter {
     this.newAsn,
     this.oldInverterLocation = OldInverterLocation.warehouse,
     this.approvedBy = '',
+    this.dataloggerSn = '',
+    this.inverterSn = '',
     this.notes = '',
     this.photos = const [],
     this.documents = const [],
@@ -106,6 +111,8 @@ class Inverter {
     bool clearNewAsn = false,
     OldInverterLocation? oldInverterLocation,
     String? approvedBy,
+    String? dataloggerSn,
+    String? inverterSn,
     String? notes,
     List<String>? photos,
     List<String>? documents,
@@ -130,6 +137,8 @@ class Inverter {
       newAsn: clearNewAsn ? null : (newAsn ?? this.newAsn),
       oldInverterLocation: oldInverterLocation ?? this.oldInverterLocation,
       approvedBy: approvedBy ?? this.approvedBy,
+      dataloggerSn: dataloggerSn ?? this.dataloggerSn,
+      inverterSn: inverterSn ?? this.inverterSn,
       notes: notes ?? this.notes,
       photos: photos ?? this.photos,
       documents: documents ?? this.documents,
@@ -157,6 +166,8 @@ class Inverter {
       'new_asn': newAsn,
       'old_location': oldInverterLocation.name,
       'approved_by': approvedBy,
+      'datalogger_sn': dataloggerSn,
+      'inverter_sn': inverterSn,
       'notes': notes,
       'photos': jsonEncode(photos),
       'documents': jsonEncode(documents),
@@ -197,6 +208,8 @@ class Inverter {
         map['old_location'] as String?,
       ),
       approvedBy: (map['approved_by'] as String?) ?? '',
+      dataloggerSn: (map['datalogger_sn'] as String?) ?? '',
+      inverterSn: (map['inverter_sn'] as String?) ?? '',
       notes: (map['notes'] as String?) ?? '',
       photos: decodeList(map['photos']),
       documents: decodeList(map['documents']),

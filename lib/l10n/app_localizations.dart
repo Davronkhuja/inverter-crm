@@ -376,6 +376,18 @@ abstract class AppLocalizations {
   /// **'Inverter ASN (serial number) *'**
   String get fieldAsn;
 
+  /// No description provided for @fieldDataloggerSn.
+  ///
+  /// In en, this message translates to:
+  /// **'Datalogger SN'**
+  String get fieldDataloggerSn;
+
+  /// No description provided for @fieldInverterSn.
+  ///
+  /// In en, this message translates to:
+  /// **'Inverter SN'**
+  String get fieldInverterSn;
+
   /// No description provided for @fieldClientName.
   ///
   /// In en, this message translates to:

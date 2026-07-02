@@ -55,6 +55,8 @@
   "fieldOrderNoAuto": "Buyurtma raqami (avtomatik beriladi)",
   "fieldModel": "Inverter modeli *",
   "fieldAsn": "Inverter ASN (seriya raqami) *",
+  "fieldDataloggerSn": "Datalogger SN",
+  "fieldInverterSn": "Inverter SN",
   "fieldClientName": "Mijoz ismi *",
   "sectionDates": "Sanalar",
   "fieldInstallationDate": "O‘rnatish sanasi",

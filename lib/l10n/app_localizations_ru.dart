@@ -154,6 +154,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get fieldAsn => 'ASN инвертора (серийный номер) *';
 
   @override
+  String get fieldDataloggerSn => 'Datalogger SN';
+
+  @override
+  String get fieldInverterSn => 'Inverter SN';
+
+  @override
   String get fieldClientName => 'Имя клиента *';
 
   @override

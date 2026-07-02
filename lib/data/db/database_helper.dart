@@ -8,7 +8,7 @@ class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._();
 
   static const _dbName = 'inverter_crm.db';
-  static const _dbVersion = 2;
+  static const _dbVersion = 3;
 
   Database? _db;
 
@@ -34,6 +34,14 @@ class DatabaseHelper {
         "ALTER TABLE inverters ADD COLUMN approved_by TEXT NOT NULL DEFAULT ''",
       );
     }
+    if (oldVersion < 3) {
+      await db.execute(
+        "ALTER TABLE inverters ADD COLUMN datalogger_sn TEXT NOT NULL DEFAULT ''",
+      );
+      await db.execute(
+        "ALTER TABLE inverters ADD COLUMN inverter_sn TEXT NOT NULL DEFAULT ''",
+      );
+    }
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -56,6 +64,8 @@ class DatabaseHelper {
         new_asn TEXT,
         old_location TEXT,
         approved_by TEXT NOT NULL DEFAULT '',
+        datalogger_sn TEXT NOT NULL DEFAULT '',
+        inverter_sn TEXT NOT NULL DEFAULT '',
         notes TEXT,
         photos TEXT,
         documents TEXT,

@@ -55,6 +55,8 @@
   "fieldOrderNoAuto": "№ заказа (создаётся автоматически)",
   "fieldModel": "Модель инвертора *",
   "fieldAsn": "ASN инвертора (серийный номер) *",
+  "fieldDataloggerSn": "Datalogger SN",
+  "fieldInverterSn": "Inverter SN",
   "fieldClientName": "Имя клиента *",
   "sectionDates": "Даты",
   "fieldInstallationDate": "Дата установки",

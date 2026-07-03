@@ -382,12 +382,6 @@ abstract class AppLocalizations {
   /// **'Datalogger SN'**
   String get fieldDataloggerSn;
 
-  /// No description provided for @fieldInverterSn.
-  ///
-  /// In en, this message translates to:
-  /// **'Inverter SN'**
-  String get fieldInverterSn;
-
   /// No description provided for @fieldClientName.
   ///
   /// In en, this message translates to:

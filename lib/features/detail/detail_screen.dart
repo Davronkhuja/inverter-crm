@@ -279,11 +279,6 @@ class _DetailScreenState extends State<DetailScreen> {
                         value: inv.dataloggerSn,
                       ),
                       InfoTile(
-                        icon: icons.asn,
-                        label: l10n.fieldInverterSn,
-                        value: inv.inverterSn,
-                      ),
-                      InfoTile(
                         icon: icons.model,
                         label: l10n.fieldModelLabel,
                         value: inv.model,

@@ -38,9 +38,6 @@ class DatabaseHelper {
       await db.execute(
         "ALTER TABLE inverters ADD COLUMN datalogger_sn TEXT NOT NULL DEFAULT ''",
       );
-      await db.execute(
-        "ALTER TABLE inverters ADD COLUMN inverter_sn TEXT NOT NULL DEFAULT ''",
-      );
     }
   }
 
@@ -65,7 +62,6 @@ class DatabaseHelper {
         old_location TEXT,
         approved_by TEXT NOT NULL DEFAULT '',
         datalogger_sn TEXT NOT NULL DEFAULT '',
-        inverter_sn TEXT NOT NULL DEFAULT '',
         notes TEXT,
         photos TEXT,
         documents TEXT,

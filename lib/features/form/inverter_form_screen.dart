@@ -46,7 +46,6 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
   late final TextEditingController _approvedBy;
   late final TextEditingController _newAsn;
   late final TextEditingController _dataloggerSn;
-  late final TextEditingController _inverterSn;
   late final TextEditingController _notes;
 
   /// Зафиксирован один раз при открытии формы для НОВОЙ записи, чтобы
@@ -80,7 +79,6 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
     _approvedBy = TextEditingController(text: e?.approvedBy ?? '');
     _newAsn = TextEditingController(text: e?.newAsn ?? '');
     _dataloggerSn = TextEditingController(text: e?.dataloggerSn ?? '');
-    _inverterSn = TextEditingController(text: e?.inverterSn ?? '');
     _notes = TextEditingController(text: e?.notes ?? '');
     _installationDate = e?.installationDate;
     _saleDate = e?.saleDate;
@@ -105,7 +103,6 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
       _approvedBy,
       _newAsn,
       _dataloggerSn,
-      _inverterSn,
       _notes,
     ]) {
       c.dispose();
@@ -234,7 +231,6 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
       solution: _solution.text.trim(),
       approvedBy: _approvedBy.text.trim(),
       dataloggerSn: _dataloggerSn.text.trim(),
-      inverterSn: _inverterSn.text.trim(),
       replaced: _replaced,
       newAsn: _replaced ? _newAsn.text.trim() : null,
       oldInverterLocation: _oldLocation,
@@ -298,11 +294,6 @@ class _InverterFormScreenState extends State<InverterFormScreen> {
               controller: _dataloggerSn,
               label: l10n.fieldDataloggerSn,
               icon: icons.orderNo,
-            ),
-            _field(
-              controller: _inverterSn,
-              label: l10n.fieldInverterSn,
-              icon: icons.asn,
             ),
             _field(
               controller: _client,

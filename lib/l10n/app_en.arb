@@ -68,7 +68,6 @@
   "fieldModel": "Inverter model *",
   "fieldAsn": "Inverter ASN (serial number) *",
   "fieldDataloggerSn": "Datalogger SN",
-  "fieldInverterSn": "Inverter SN",
   "fieldClientName": "Client name *",
   "sectionDates": "Dates",
   "fieldInstallationDate": "Installation date",

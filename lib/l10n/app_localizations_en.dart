@@ -157,9 +157,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fieldDataloggerSn => 'Datalogger SN';
 
   @override
-  String get fieldInverterSn => 'Inverter SN';
-
-  @override
   String get fieldClientName => 'Client name *';
 
   @override

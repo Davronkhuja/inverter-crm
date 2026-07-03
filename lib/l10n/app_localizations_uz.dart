@@ -159,9 +159,6 @@ class AppLocalizationsUz extends AppLocalizations {
   String get fieldDataloggerSn => 'Datalogger SN';
 
   @override
-  String get fieldInverterSn => 'Inverter SN';
-
-  @override
   String get fieldClientName => 'Mijoz ismi *';
 
   @override

@@ -43,3 +43,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Gradle build cache and lock files (machine-generated, not portable)
+android/.gradle/

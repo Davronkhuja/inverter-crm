@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_icons_context.dart';
 import '../../l10n/app_localizations.dart';
 import '../account/account_screen.dart';
+import '../analytics/analytics_screen.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../warehouse/warehouse_screen.dart';
 
 /// Корневой каркас приложения: нижняя навигация между Dashboard,
-/// Warehouse и Account. Каждая вкладка хранит собственное состояние
-/// благодаря IndexedStack (не пересоздаётся при переключении).
+/// Warehouse, Analytics и Account. IndexedStack сохраняет состояние вкладок.
 class RootShell extends StatefulWidget {
   const RootShell({super.key});
 
@@ -24,9 +24,10 @@ class _RootShellState extends State<RootShell> {
     final l10n = AppLocalizations.of(context)!;
     final icons = context.icons;
 
-    final screens = const [
+    const screens = [
       DashboardScreen(),
       WarehouseScreen(),
+      AnalyticsScreen(),
       AccountScreen(),
     ];
 
@@ -45,6 +46,11 @@ class _RootShellState extends State<RootShell> {
             icon: Icon(icons.navWarehouse),
             selectedIcon: Icon(icons.navWarehouseSelected),
             label: l10n.navWarehouse,
+          ),
+          NavigationDestination(
+            icon: Icon(icons.navAnalytics),
+            selectedIcon: Icon(icons.navAnalyticsSelected),
+            label: l10n.navAnalytics,
           ),
           NavigationDestination(
             icon: Icon(icons.navAccount),

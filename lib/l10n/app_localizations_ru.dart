@@ -520,8 +520,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get accountDataExport => 'Экспорт данных';
 
   @override
-  String get exportDescription =>
-      'Экспортировать инверторы, видимые сейчас на дашборде.';
+  String get exportDescription => 'Экспортируйте все записи инверторов в файл.';
 
   @override
   String get themeSystem => 'Системная';
@@ -616,4 +615,119 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get no => 'Нет';
+
+  @override
+  String get sortBy => 'Сортировка';
+
+  @override
+  String get sortByDate => 'Дата установки';
+
+  @override
+  String get sortByModel => 'Модель';
+
+  @override
+  String get sortByClient => 'Клиент';
+
+  @override
+  String get sortByOrderNo => 'Номер заказа';
+
+  @override
+  String get sortAscending => 'По возрастанию';
+
+  @override
+  String get sortDescending => 'По убыванию';
+
+  @override
+  String get warrantyExpired => 'Гарантия истекла';
+
+  @override
+  String warrantyDaysLeft(int days) {
+    return 'Осталось $days дн.';
+  }
+
+  @override
+  String get navAnalytics => 'Аналитика';
+
+  @override
+  String get analyticsTitle => 'Аналитика';
+
+  @override
+  String get analyticsByFaultType => 'По типу неисправности';
+
+  @override
+  String get analyticsByModel => 'По моделям';
+
+  @override
+  String get analyticsByStatus => 'По статусу';
+
+  @override
+  String get analyticsNoData => 'Нет данных';
+
+  @override
+  String analyticsRecords(int count) {
+    return '$count записей';
+  }
+
+  @override
+  String get exportColOrderNo => 'Номер заказа';
+
+  @override
+  String get exportColModel => 'Модель';
+
+  @override
+  String get exportColAsn => 'ASN';
+
+  @override
+  String get exportColDataloggerSn => 'Datalogger SN';
+
+  @override
+  String get exportColClient => 'Клиент';
+
+  @override
+  String get exportColInstallDate => 'Дата установки';
+
+  @override
+  String get exportColSaleDate => 'Дата продажи';
+
+  @override
+  String get exportColLocation => 'Местоположение';
+
+  @override
+  String get exportColFaultType => 'Тип неисправности';
+
+  @override
+  String get exportColFaultDesc => 'Описание неисправности';
+
+  @override
+  String get exportColSolution => 'Решение';
+
+  @override
+  String get exportColApprovedBy => 'Одобрил';
+
+  @override
+  String get exportColReplaced => 'Заменён';
+
+  @override
+  String get exportColNewAsn => 'Новый ASN';
+
+  @override
+  String get exportColOldLocation => 'Прежнее местонахождение';
+
+  @override
+  String get exportYes => 'Да';
+
+  @override
+  String get exportNo => 'Нет';
+
+  @override
+  String get exportNoFault => 'Нет неисправности';
+
+  @override
+  String get exportActiveSheet => 'Активные инверторы';
+
+  @override
+  String get exportWarehouseSheet => 'Склад';
+
+  @override
+  String get shareInverter => 'Поделиться';
 }

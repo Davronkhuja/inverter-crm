@@ -10,6 +10,8 @@ class AppIconSet {
   final IconData navDashboardSelected;
   final IconData navWarehouse;
   final IconData navWarehouseSelected;
+  final IconData navAnalytics;
+  final IconData navAnalyticsSelected;
   final IconData navAccount;
   final IconData navAccountSelected;
 
@@ -88,6 +90,8 @@ class AppIconSet {
     required this.navDashboardSelected,
     required this.navWarehouse,
     required this.navWarehouseSelected,
+    required this.navAnalytics,
+    required this.navAnalyticsSelected,
     required this.navAccount,
     required this.navAccountSelected,
     required this.brand,
@@ -152,6 +156,8 @@ class AppIconSet {
     navDashboardSelected: Icons.bolt_rounded,
     navWarehouse: Icons.battery_charging_full_outlined,
     navWarehouseSelected: Icons.battery_charging_full_rounded,
+    navAnalytics: Icons.bar_chart_outlined,
+    navAnalyticsSelected: Icons.bar_chart_rounded,
     navAccount: Icons.account_circle_outlined,
     navAccountSelected: Icons.account_circle_rounded,
     brand: Icons.bolt_rounded,
@@ -216,6 +222,8 @@ class AppIconSet {
     navDashboardSelected: Icons.eco,
     navWarehouse: Icons.warehouse_outlined,
     navWarehouseSelected: Icons.warehouse,
+    navAnalytics: Icons.bar_chart_outlined,
+    navAnalyticsSelected: Icons.bar_chart_rounded,
     navAccount: Icons.person_outline_rounded,
     navAccountSelected: Icons.person_rounded,
     brand: Icons.solar_power_outlined,
@@ -280,6 +288,8 @@ class AppIconSet {
     navDashboardSelected: Icons.dashboard_sharp,
     navWarehouse: Icons.dns_sharp,
     navWarehouseSelected: Icons.dns_sharp,
+    navAnalytics: Icons.bar_chart_sharp,
+    navAnalyticsSelected: Icons.bar_chart_sharp,
     navAccount: Icons.terminal_sharp,
     navAccountSelected: Icons.terminal_sharp,
     brand: Icons.memory_sharp,

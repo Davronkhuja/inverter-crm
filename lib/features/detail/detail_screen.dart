@@ -17,6 +17,7 @@ import '../../l10n/app_localizations.dart';
 import '../../state/inverter_provider.dart';
 import '../../widgets/info_tile.dart';
 import '../../widgets/status_badge.dart';
+import '../export/export_service.dart';
 import '../form/inverter_form_screen.dart';
 import 'widgets/replacement_chain.dart';
 
@@ -175,6 +176,18 @@ class _DetailScreenState extends State<DetailScreen> {
     await SharePlus.instance.share(ShareParams(files: [XFile(path)]));
   }
 
+  Future<void> _sharePdf(Inverter inv) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      await ExportService().export([inv], ExportFormat.pdf, l10n);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.exportFailed(e.toString()))),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -217,6 +230,11 @@ class _DetailScreenState extends State<DetailScreen> {
             pinned: true,
             expandedHeight: 150,
             actions: [
+              IconButton(
+                tooltip: l10n.shareInverter,
+                icon: Icon(icons.share),
+                onPressed: () => _sharePdf(inv!),
+              ),
               IconButton(
                 tooltip: l10n.detailEdit,
                 icon: Icon(icons.edit),

@@ -166,13 +166,13 @@ class _AccountScreenState extends State<AccountScreen> {
   Future<void> _export(ExportFormat format) async {
     final l10n = AppLocalizations.of(context)!;
     final provider = context.read<InverterProvider>();
-    final visible = provider.visible;
-    if (visible.isEmpty) {
+    final all = provider.all;
+    if (all.isEmpty) {
       _snack(l10n.exportNothing);
       return;
     }
     try {
-      await ExportService().export(visible, format);
+      await ExportService().export(all, format, l10n);
     } catch (e) {
       _snack(l10n.exportFailed(e.toString()));
     }

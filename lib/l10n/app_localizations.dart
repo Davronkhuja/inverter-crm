@@ -1075,7 +1075,7 @@ abstract class AppLocalizations {
   /// No description provided for @exportDescription.
   ///
   /// In en, this message translates to:
-  /// **'Export the inverters currently visible on the dashboard.'**
+  /// **'Export all inverter records to a file.'**
   String get exportDescription;
 
   /// No description provided for @themeSystem.
@@ -1263,6 +1263,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No'**
   String get no;
+
+  /// No description provided for @sortBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort by'**
+  String get sortBy;
+
+  /// No description provided for @sortByDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Install date'**
+  String get sortByDate;
+
+  /// No description provided for @sortByModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get sortByModel;
+
+  /// No description provided for @sortByClient.
+  ///
+  /// In en, this message translates to:
+  /// **'Client'**
+  String get sortByClient;
+
+  /// No description provided for @sortByOrderNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Order no.'**
+  String get sortByOrderNo;
+
+  /// No description provided for @sortAscending.
+  ///
+  /// In en, this message translates to:
+  /// **'Ascending'**
+  String get sortAscending;
+
+  /// No description provided for @sortDescending.
+  ///
+  /// In en, this message translates to:
+  /// **'Descending'**
+  String get sortDescending;
+
+  /// No description provided for @warrantyExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Warranty expired'**
+  String get warrantyExpired;
+
+  /// No description provided for @warrantyDaysLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{days}d left'**
+  String warrantyDaysLeft(int days);
+
+  /// No description provided for @navAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics'**
+  String get navAnalytics;
+
+  /// No description provided for @analyticsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics'**
+  String get analyticsTitle;
+
+  /// No description provided for @analyticsByFaultType.
+  ///
+  /// In en, this message translates to:
+  /// **'By fault type'**
+  String get analyticsByFaultType;
+
+  /// No description provided for @analyticsByModel.
+  ///
+  /// In en, this message translates to:
+  /// **'By model'**
+  String get analyticsByModel;
+
+  /// No description provided for @analyticsByStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'By status'**
+  String get analyticsByStatus;
+
+  /// No description provided for @analyticsNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No data'**
+  String get analyticsNoData;
+
+  /// No description provided for @analyticsRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} records'**
+  String analyticsRecords(int count);
+
+  /// No description provided for @exportColOrderNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Order No'**
+  String get exportColOrderNo;
+
+  /// No description provided for @exportColModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get exportColModel;
+
+  /// No description provided for @exportColAsn.
+  ///
+  /// In en, this message translates to:
+  /// **'ASN'**
+  String get exportColAsn;
+
+  /// No description provided for @exportColDataloggerSn.
+  ///
+  /// In en, this message translates to:
+  /// **'Datalogger SN'**
+  String get exportColDataloggerSn;
+
+  /// No description provided for @exportColClient.
+  ///
+  /// In en, this message translates to:
+  /// **'Client'**
+  String get exportColClient;
+
+  /// No description provided for @exportColInstallDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Install Date'**
+  String get exportColInstallDate;
+
+  /// No description provided for @exportColSaleDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale Date'**
+  String get exportColSaleDate;
+
+  /// No description provided for @exportColLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get exportColLocation;
+
+  /// No description provided for @exportColFaultType.
+  ///
+  /// In en, this message translates to:
+  /// **'Fault Type'**
+  String get exportColFaultType;
+
+  /// No description provided for @exportColFaultDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Fault Description'**
+  String get exportColFaultDesc;
+
+  /// No description provided for @exportColSolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Solution'**
+  String get exportColSolution;
+
+  /// No description provided for @exportColApprovedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved By'**
+  String get exportColApprovedBy;
+
+  /// No description provided for @exportColReplaced.
+  ///
+  /// In en, this message translates to:
+  /// **'Replaced'**
+  String get exportColReplaced;
+
+  /// No description provided for @exportColNewAsn.
+  ///
+  /// In en, this message translates to:
+  /// **'New ASN'**
+  String get exportColNewAsn;
+
+  /// No description provided for @exportColOldLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Old Location'**
+  String get exportColOldLocation;
+
+  /// No description provided for @exportYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get exportYes;
+
+  /// No description provided for @exportNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get exportNo;
+
+  /// No description provided for @exportNoFault.
+  ///
+  /// In en, this message translates to:
+  /// **'No fault'**
+  String get exportNoFault;
+
+  /// No description provided for @exportActiveSheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Inverters'**
+  String get exportActiveSheet;
+
+  /// No description provided for @exportWarehouseSheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Warehouse'**
+  String get exportWarehouseSheet;
+
+  /// No description provided for @shareInverter.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get shareInverter;
 }
 
 class _AppLocalizationsDelegate

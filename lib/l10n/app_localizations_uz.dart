@@ -523,8 +523,7 @@ class AppLocalizationsUz extends AppLocalizations {
   String get accountDataExport => 'Ma’lumotlarni eksport qilish';
 
   @override
-  String get exportDescription =>
-      'Hozir dashboard’da ko‘rinayotgan inverterlarni eksport qiling.';
+  String get exportDescription => 'Barcha inverter yozuvlarini eksport qiling.';
 
   @override
   String get themeSystem => 'Tizim';
@@ -621,5 +620,120 @@ class AppLocalizationsUz extends AppLocalizations {
   String get yes => 'Ha';
 
   @override
-  String get no => 'Yo‘q';
+  String get no => 'Yo’q';
+
+  @override
+  String get sortBy => 'Saralash';
+
+  @override
+  String get sortByDate => 'O’rnatish sanasi';
+
+  @override
+  String get sortByModel => 'Model';
+
+  @override
+  String get sortByClient => 'Mijoz';
+
+  @override
+  String get sortByOrderNo => 'Tartib raqami';
+
+  @override
+  String get sortAscending => 'O’sish tartibida';
+
+  @override
+  String get sortDescending => 'Kamayish tartibida';
+
+  @override
+  String get warrantyExpired => 'Kafolat tugagan';
+
+  @override
+  String warrantyDaysLeft(int days) {
+    return '$days kun qoldi';
+  }
+
+  @override
+  String get navAnalytics => 'Statistika';
+
+  @override
+  String get analyticsTitle => 'Statistika';
+
+  @override
+  String get analyticsByFaultType => 'Nosozlik turlari';
+
+  @override
+  String get analyticsByModel => 'Modellar bo’yicha';
+
+  @override
+  String get analyticsByStatus => 'Holat bo’yicha';
+
+  @override
+  String get analyticsNoData => 'Ma’lumot yo’q';
+
+  @override
+  String analyticsRecords(int count) {
+    return '$count ta yozuv';
+  }
+
+  @override
+  String get exportColOrderNo => 'Buyurtma raqami';
+
+  @override
+  String get exportColModel => 'Model';
+
+  @override
+  String get exportColAsn => 'ASN';
+
+  @override
+  String get exportColDataloggerSn => 'Datalogger SN';
+
+  @override
+  String get exportColClient => 'Mijoz';
+
+  @override
+  String get exportColInstallDate => 'O’rnatish sanasi';
+
+  @override
+  String get exportColSaleDate => 'Sotuv sanasi';
+
+  @override
+  String get exportColLocation => 'Joylashuv';
+
+  @override
+  String get exportColFaultType => 'Nosozlik turi';
+
+  @override
+  String get exportColFaultDesc => 'Nosozlik tavsifi';
+
+  @override
+  String get exportColSolution => 'Yechim';
+
+  @override
+  String get exportColApprovedBy => 'Tasdiqlagan';
+
+  @override
+  String get exportColReplaced => 'Almashtirilgan';
+
+  @override
+  String get exportColNewAsn => 'Yangi ASN';
+
+  @override
+  String get exportColOldLocation => 'Eski joylashuv';
+
+  @override
+  String get exportYes => 'Ha';
+
+  @override
+  String get exportNo => 'Yo’q';
+
+  @override
+  String get exportNoFault => 'Nosozlik yo’q';
+
+  @override
+  String get exportActiveSheet => 'Faol inverterlar';
+
+  @override
+  String get exportWarehouseSheet => 'Ombor';
+
+  @override
+  String get shareInverter => 'Ulashish';
 }

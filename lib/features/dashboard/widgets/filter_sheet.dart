@@ -7,6 +7,18 @@ import '../../../core/utils/formatters.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../state/inverter_filter.dart';
 
+extension SortByL10n on SortBy {
+  String label(AppLocalizations l) {
+    switch (this) {
+      case SortBy.installDate: return l.sortByDate;
+      case SortBy.saleDate:    return l.fieldSaleDate;
+      case SortBy.model:       return l.sortByModel;
+      case SortBy.client:      return l.sortByClient;
+      case SortBy.orderNo:     return l.sortByOrderNo;
+    }
+  }
+}
+
 /// Нижний лист с фильтрами дашборда: статус замены, тип неисправности,
 /// модель, диапазоны дат установки и продажи (ТЗ §2).
 class FilterSheet extends StatefulWidget {
@@ -107,6 +119,37 @@ class _FilterSheetState extends State<FilterSheet> {
                 ],
               ),
               const SizedBox(height: 8),
+
+              _label(theme, l10n.sortBy),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      children: SortBy.values.map((s) {
+                        final selected = _draft.sortBy == s;
+                        return ChoiceChip(
+                          label: Text(s.label(l10n)),
+                          selected: selected,
+                          onSelected: (_) =>
+                              setState(() => _draft = _draft.copyWith(sortBy: s)),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  _dirChip(l10n.sortAscending, SortDir.asc, theme, scheme),
+                  const SizedBox(width: 8),
+                  _dirChip(l10n.sortDescending, SortDir.desc, theme, scheme),
+                ],
+              ),
+              const SizedBox(height: 18),
 
               _label(theme, l10n.filterReplacedOnly),
               const SizedBox(height: 8),
@@ -210,6 +253,20 @@ class _FilterSheetState extends State<FilterSheet> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _dirChip(
+    String label,
+    SortDir dir,
+    ThemeData theme,
+    ColorScheme scheme,
+  ) {
+    final selected = _draft.sortDir == dir;
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => setState(() => _draft = _draft.copyWith(sortDir: dir)),
     );
   }
 

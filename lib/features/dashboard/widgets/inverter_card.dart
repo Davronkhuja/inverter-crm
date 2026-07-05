@@ -118,6 +118,7 @@ class InverterCard extends StatelessWidget {
                           color: scheme.onSurfaceVariant,
                           icon: icons.calendar,
                         ),
+                        ..._warrantyBadge(inv, l10n, scheme, icons),
                       ],
                     ),
                   ],
@@ -151,6 +152,32 @@ class InverterCard extends StatelessWidget {
       color: const Color(0xFF2E9E5B),
       icon: icons.statusActive,
     );
+  }
+
+  // Shows a warranty badge only when expiry is within 180 days or already past.
+  List<Widget> _warrantyBadge(
+    Inverter inv,
+    AppLocalizations l10n,
+    ColorScheme scheme,
+    AppIconSet icons,
+  ) {
+    if (inv.saleDate == null || inv.replaced) return const [];
+    final expiry = DateTime(
+      inv.saleDate!.year + 5,
+      inv.saleDate!.month,
+      inv.saleDate!.day,
+    );
+    final daysLeft = expiry.difference(DateTime.now()).inDays;
+    if (daysLeft > 180) return const [];
+    final color = daysLeft <= 0
+        ? scheme.error
+        : daysLeft <= 30
+            ? scheme.error.withValues(alpha: 0.85)
+            : const Color(0xFFE67E22);
+    final label = daysLeft <= 0
+        ? l10n.warrantyExpired
+        : l10n.warrantyDaysLeft(daysLeft);
+    return [StatusBadge(label: label, color: color, icon: icons.calendar)];
   }
 
   Widget _metaRow(

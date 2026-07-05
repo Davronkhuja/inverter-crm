@@ -244,5 +244,53 @@
   "ok": "OK",
   "save": "Save",
   "yes": "Yes",
-  "no": "No"
+  "no": "No",
+
+  "sortBy": "Sort by",
+  "sortByDate": "Install date",
+  "sortByModel": "Model",
+  "sortByClient": "Client",
+  "sortByOrderNo": "Order no.",
+  "sortAscending": "Ascending",
+  "sortDescending": "Descending",
+
+  "warrantyExpired": "Warranty expired",
+  "warrantyDaysLeft": "{days}d left",
+  "@warrantyDaysLeft": {
+    "placeholders": { "days": { "type": "int" } }
+  },
+
+  "navAnalytics": "Analytics",
+  "analyticsTitle": "Analytics",
+  "analyticsByFaultType": "By fault type",
+  "analyticsByModel": "By model",
+  "analyticsByStatus": "By status",
+  "analyticsNoData": "No data",
+  "analyticsRecords": "{count} records",
+  "@analyticsRecords": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "exportColOrderNo": "Order No",
+  "exportColModel": "Model",
+  "exportColAsn": "ASN",
+  "exportColDataloggerSn": "Datalogger SN",
+  "exportColClient": "Client",
+  "exportColInstallDate": "Install Date",
+  "exportColSaleDate": "Sale Date",
+  "exportColLocation": "Location",
+  "exportColFaultType": "Fault Type",
+  "exportColFaultDesc": "Fault Description",
+  "exportColSolution": "Solution",
+  "exportColApprovedBy": "Approved By",
+  "exportColReplaced": "Replaced",
+  "exportColNewAsn": "New ASN",
+  "exportColOldLocation": "Old Location",
+  "exportYes": "Yes",
+  "exportNo": "No",
+  "exportNoFault": "No fault",
+  "exportActiveSheet": "Active Inverters",
+  "exportWarehouseSheet": "Warehouse",
+  "exportDescription": "Export all inverter records to a file.",
+  "shareInverter": "Share"
 }

@@ -87,7 +87,8 @@ class InverterProvider extends ChangeNotifier {
   void clearFilters() {
     _filter = InverterFilter(
       query: _filter.query,
-      replaced: ReplacedFilter.notReplaced,
+      sortBy: _filter.sortBy,
+      sortDir: _filter.sortDir,
     );
     notifyListeners();
   }

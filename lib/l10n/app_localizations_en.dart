@@ -519,8 +519,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountDataExport => 'Data export';
 
   @override
-  String get exportDescription =>
-      'Export the inverters currently visible on the dashboard.';
+  String get exportDescription => 'Export all inverter records to a file.';
 
   @override
   String get themeSystem => 'System';
@@ -616,4 +615,119 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get no => 'No';
+
+  @override
+  String get sortBy => 'Sort by';
+
+  @override
+  String get sortByDate => 'Install date';
+
+  @override
+  String get sortByModel => 'Model';
+
+  @override
+  String get sortByClient => 'Client';
+
+  @override
+  String get sortByOrderNo => 'Order no.';
+
+  @override
+  String get sortAscending => 'Ascending';
+
+  @override
+  String get sortDescending => 'Descending';
+
+  @override
+  String get warrantyExpired => 'Warranty expired';
+
+  @override
+  String warrantyDaysLeft(int days) {
+    return '${days}d left';
+  }
+
+  @override
+  String get navAnalytics => 'Analytics';
+
+  @override
+  String get analyticsTitle => 'Analytics';
+
+  @override
+  String get analyticsByFaultType => 'By fault type';
+
+  @override
+  String get analyticsByModel => 'By model';
+
+  @override
+  String get analyticsByStatus => 'By status';
+
+  @override
+  String get analyticsNoData => 'No data';
+
+  @override
+  String analyticsRecords(int count) {
+    return '$count records';
+  }
+
+  @override
+  String get exportColOrderNo => 'Order No';
+
+  @override
+  String get exportColModel => 'Model';
+
+  @override
+  String get exportColAsn => 'ASN';
+
+  @override
+  String get exportColDataloggerSn => 'Datalogger SN';
+
+  @override
+  String get exportColClient => 'Client';
+
+  @override
+  String get exportColInstallDate => 'Install Date';
+
+  @override
+  String get exportColSaleDate => 'Sale Date';
+
+  @override
+  String get exportColLocation => 'Location';
+
+  @override
+  String get exportColFaultType => 'Fault Type';
+
+  @override
+  String get exportColFaultDesc => 'Fault Description';
+
+  @override
+  String get exportColSolution => 'Solution';
+
+  @override
+  String get exportColApprovedBy => 'Approved By';
+
+  @override
+  String get exportColReplaced => 'Replaced';
+
+  @override
+  String get exportColNewAsn => 'New ASN';
+
+  @override
+  String get exportColOldLocation => 'Old Location';
+
+  @override
+  String get exportYes => 'Yes';
+
+  @override
+  String get exportNo => 'No';
+
+  @override
+  String get exportNoFault => 'No fault';
+
+  @override
+  String get exportActiveSheet => 'Active Inverters';
+
+  @override
+  String get exportWarehouseSheet => 'Warehouse';
+
+  @override
+  String get shareInverter => 'Share';
 }
